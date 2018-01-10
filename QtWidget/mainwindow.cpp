@@ -8,7 +8,8 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    modbusDevice(nullptr)
 {
     ui->setupUi(this);
 }
@@ -58,6 +59,7 @@ void MainWindow::on_commandLinkButton_clicked()
     QModbusDataUnit unit = QModbusDataUnit(QModbusDataUnit::HoldingRegisters, 0, 10);
     QModbusReply *r = modbusDevice->sendReadRequest(unit, 1);
     modbusDevice->disconnectDevice();
+    delete modbusDevice;
 
     if (!r)
         qDebug() << "Erro ao ler o dispositivo\n";
