@@ -12,58 +12,90 @@ MainWindow::MainWindow(QWidget *parent) :
     modbusDevice(nullptr)
 {
     ui->setupUi(this);
+
+    if (modbusDevice) {
+        modbusDevice->disconnectDevice();
+        delete modbusDevice;
+        modbusDevice = nullptr;
+    }
+
+    modbusDevice = new QModbusTcpClient(this);
+    modbusDevice->setTimeout(1000);
+    modbusDevice->setNumberOfRetries(3);
+    isConn = false;
+
+    ui->label->setText("Desconectado");
 }
 
 MainWindow::~MainWindow()
 {
+    if (modbusDevice)
+        modbusDevice->disconnectDevice();
+    delete modbusDevice;
+
     delete ui;
 }
 
 void MainWindow::on_commandLinkButton_clicked()
 {
-    qDebug() << "Criando mestre modbus\n";
+    if (!modbusDevice)
+        return;
 
     QString addr = ui->textEdit->toPlainText();
 
-    qDebug() << "Texto: " << ui->textEdit->toPlainText();
-
     if (addr.isEmpty())
     {
-        addr = "192.168.0.100:502";
-    }
-
-    modbusDevice = new QModbusTcpClient(this);
-
-    if (!modbusDevice)
-    {
-        qDebug() << "Could not create Modbus master.\n";
-        return ;
+        addr = "cuki-pc:502";
+        ui->textEdit->setText(addr);
     }
 
     const QUrl url = QUrl::fromUserInput(addr);
     modbusDevice->setConnectionParameter(QModbusDevice::NetworkPortParameter, url.port());
     modbusDevice->setConnectionParameter(QModbusDevice::NetworkAddressParameter, url.host());
-    modbusDevice->setTimeout(1000);
-    modbusDevice->setNumberOfRetries(3);
 
-    if (!modbusDevice->connectDevice())
+    if (isConn)
     {
-        qDebug() << "Impossivel conectar " << url.host() << " : " << url.port() << '\n';
-        return ;
+        modbusDevice->disconnectDevice();
+        isConn = false;
+        qDebug() << "Desconectando";
+        ui->label->setText("Desconectado");
     }
     else
     {
-        qDebug() << "Conectado\n";
+        qDebug() << "Conectando a" << url.host() << ":" << url.port();
+
+        if (!modbusDevice->connectDevice())
+        {
+            qDebug() << "Falha na conexao";
+            ui->label->setText("Falha na conexao");
+        }
+        else
+        {
+            qDebug() << "Conectado com sucesso";
+            isConn = true;
+            ui->label->setText("Conectado com sucesso");
+        }
     }
+}
+
+void MainWindow::on_readButton_clicked()
+{
+    if (!modbusDevice)
+        return;
 
     QModbusDataUnit unit = QModbusDataUnit(QModbusDataUnit::HoldingRegisters, 0, 10);
-    QModbusReply *r = modbusDevice->sendReadRequest(unit, 1);
-    modbusDevice->disconnectDevice();
-    delete modbusDevice;
 
-    if (!r)
-        qDebug() << "Erro ao ler o dispositivo\n";
+    auto *reply = modbusDevice->sendReadRequest(unit, 1);
+
+    if (!reply)
+    {
+        QString str = "Erro de resposta\n" + modbusDevice->errorString();
+        qDebug() << str;
+        ui->label->setText(str);
+    }
     else
-        qDebug() << "Sucesso\n";
-
+    {
+        qDebug() << "Houve resposta";
+        ui->label->setText("Houve resposta");
+    }
 }

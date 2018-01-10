@@ -13,6 +13,7 @@ class MainWindow;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
+    bool isConn;
 
 public:
     explicit MainWindow(QWidget *parent = 0);
@@ -20,6 +21,8 @@ public:
 
 private slots:
     void on_commandLinkButton_clicked();
+
+    void on_readButton_clicked();
 
 private:
     Ui::MainWindow *ui;
