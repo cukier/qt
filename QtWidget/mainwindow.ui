@@ -6,63 +6,76 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>720</width>
-    <height>564</height>
+    <width>705</width>
+    <height>440</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QTextEdit" name="textEdit">
-    <property name="geometry">
-     <rect>
-      <x>40</x>
-      <y>40</y>
-      <width>491</width>
-      <height>61</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QCommandLinkButton" name="commandLinkButton">
-    <property name="geometry">
-     <rect>
-      <x>40</x>
-      <y>130</y>
-      <width>271</width>
-      <height>111</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>CommandLinkButton</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="readButton">
-    <property name="geometry">
-     <rect>
-      <x>340</x>
-      <y>130</y>
-      <width>191</width>
-      <height>111</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>PushButton</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label">
-    <property name="geometry">
-     <rect>
-      <x>100</x>
-      <y>310</y>
-      <width>401</width>
-      <height>161</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>TextLabel</string>
-    </property>
-   </widget>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="3" column="0">
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>TextLabel</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QTextEdit" name="textEdit">
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>51</height>
+       </size>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QPushButton" name="readButton">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>50</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Ler</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="connButton">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>50</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Conectar</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="2" column="0" colspan="2">
+     <spacer name="verticalSpacer_2">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+   </layout>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>

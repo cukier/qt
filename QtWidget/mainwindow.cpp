@@ -36,7 +36,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::on_commandLinkButton_clicked()
+void MainWindow::on_connButton_clicked()
 {
     if (!modbusDevice)
         return;
@@ -62,19 +62,22 @@ void MainWindow::on_commandLinkButton_clicked()
     }
     else
     {
+        QString msg = "Conectando a " + url.host() + ":" + QString::number(url.port()) + '\n';
         qDebug() << "Conectando a" << url.host() << ":" << url.port();
 
         if (!modbusDevice->connectDevice())
         {
             qDebug() << "Falha na conexao";
-            ui->label->setText("Falha na conexao");
+            msg += "Falha na conexao";
         }
         else
         {
             qDebug() << "Conectado com sucesso";
             isConn = true;
-            ui->label->setText("Conectado com sucesso");
+            msg += "Conectado com sucesso";
         }
+
+        ui->label->setText(msg);
     }
 }
 
@@ -87,15 +90,18 @@ void MainWindow::on_readButton_clicked()
 
     auto *reply = modbusDevice->sendReadRequest(unit, 1);
 
+    QString str;
+
     if (!reply)
     {
-        QString str = "Erro de resposta\n" + modbusDevice->errorString();
+        str = "Erro de resposta\n" + modbusDevice->errorString();
         qDebug() << str;
-        ui->label->setText(str);
     }
     else
     {
         qDebug() << "Houve resposta";
-        ui->label->setText("Houve resposta");
+        str = "Houve resposta\n";
     }
+
+    ui->label->setText(str);
 }

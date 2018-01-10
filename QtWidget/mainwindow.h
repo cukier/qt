@@ -20,9 +20,9 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_commandLinkButton_clicked();
-
     void on_readButton_clicked();
+
+    void on_connButton_clicked();
 
 private:
     Ui::MainWindow *ui;
