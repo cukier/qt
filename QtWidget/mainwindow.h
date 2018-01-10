@@ -14,6 +14,7 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
     bool isConn;
+    void readReady();
 
 public:
     explicit MainWindow(QWidget *parent = 0);

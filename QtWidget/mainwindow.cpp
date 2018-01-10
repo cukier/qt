@@ -6,6 +6,29 @@
 #include <QUrl>
 #include <QModbusTcpClient>
 
+void MainWindow::readReady()
+{
+    auto reply = qobject_cast<QModbusReply *>(sender());
+
+    if (!reply)
+        return;
+
+    if (reply->error() == QModbusDevice::NoError)
+    {
+        const QModbusDataUnit unit = reply->result();
+
+        for (uint i = 0; i < unit.valueCount(); i++)
+        {
+            const QString entry = tr("Address: %1, Value: %2").arg(unit.startAddress() + i)
+                    .arg(QString::number(unit.value(i),
+                                         unit.registerType() <= QModbusDataUnit::Coils ? 10 : 16)) + '\n';
+            ui->label->setText(ui->label->text() + entry);
+        }
+    }
+
+    reply->deleteLater();
+}
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -86,9 +109,7 @@ void MainWindow::on_readButton_clicked()
     if (!modbusDevice)
         return;
 
-    QModbusDataUnit unit = QModbusDataUnit(QModbusDataUnit::HoldingRegisters, 0, 10);
-
-    auto *reply = modbusDevice->sendReadRequest(unit, 1);
+    auto *reply = modbusDevice->sendReadRequest(QModbusDataUnit(QModbusDataUnit::HoldingRegisters, 0, 10), 1);
 
     QString str;
 
@@ -99,8 +120,10 @@ void MainWindow::on_readButton_clicked()
     }
     else
     {
-        qDebug() << "Houve resposta";
-        str = "Houve resposta\n";
+        if (!reply->isFinished())
+        {
+            connect(reply, &QModbusReply::finished, this, &MainWindow::readReady);
+        }
     }
 
     ui->label->setText(str);
