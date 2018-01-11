@@ -67,8 +67,8 @@ MainWindow::~MainWindow()
 {
     if (modbusDevice)
         modbusDevice->disconnectDevice();
-    delete modbusDevice;
 
+    delete modbusDevice;
     delete ui;
 }
 
