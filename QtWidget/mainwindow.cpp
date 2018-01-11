@@ -17,12 +17,15 @@ void MainWindow::readReady()
     {
         const QModbusDataUnit unit = reply->result();
 
+        ui->label->text().clear();
+
         for (uint i = 0; i < unit.valueCount(); i++)
         {
             const QString entry = tr("Address: %1, Value: %2").arg(unit.startAddress() + i)
                     .arg(QString::number(unit.value(i),
                                          unit.registerType() <= QModbusDataUnit::Coils ? 10 : 16)) + '\n';
             ui->label->setText(ui->label->text() + entry);
+            qDebug() << entry;
         }
     }
 
@@ -72,11 +75,7 @@ void MainWindow::on_connButton_clicked()
         ui->textEdit->setText(addr);
     }
 
-    const QUrl url = QUrl::fromUserInput(addr);
-    modbusDevice->setConnectionParameter(QModbusDevice::NetworkPortParameter, url.port());
-    modbusDevice->setConnectionParameter(QModbusDevice::NetworkAddressParameter, url.host());
-
-    if (isConn)
+    if (modbusDevice->state() == QModbusDevice::ConnectedState)
     {
         modbusDevice->disconnectDevice();
         isConn = false;
@@ -85,8 +84,12 @@ void MainWindow::on_connButton_clicked()
     }
     else
     {
+        const QUrl url = QUrl::fromUserInput(addr);
+        modbusDevice->setConnectionParameter(QModbusDevice::NetworkPortParameter, url.port());
+        modbusDevice->setConnectionParameter(QModbusDevice::NetworkAddressParameter, url.host());
         QString msg = "Conectando a " + url.host() + ":" + QString::number(url.port()) + '\n';
         qDebug() << "Conectando a" << url.host() << ":" << url.port();
+        modbusDevice->connectDevice();
 
         if (!modbusDevice->connectDevice())
         {
@@ -121,9 +124,9 @@ void MainWindow::on_readButton_clicked()
     else
     {
         if (!reply->isFinished())
-        {
             connect(reply, &QModbusReply::finished, this, &MainWindow::readReady);
-        }
+        else
+            delete reply;
     }
 
     ui->label->setText(str);
