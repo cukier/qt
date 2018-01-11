@@ -58,7 +58,6 @@ MainWindow::MainWindow(QWidget *parent) :
     modbusDevice = new QModbusTcpClient(this);
     modbusDevice->setTimeout(1000);
     modbusDevice->setNumberOfRetries(3);
-    isConn = false;
 
     ui->label->setText("Desconectado");
 }
@@ -80,7 +79,6 @@ void MainWindow::on_connButton_clicked()
     if (modbusDevice->state() == QModbusDevice::ConnectedState)
     {
         modbusDevice->disconnectDevice();
-        isConn = false;
         qDebug() << "Desconectando";
         ui->label->setText("Desconectado");
     }

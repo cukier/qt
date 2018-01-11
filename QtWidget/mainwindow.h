@@ -13,7 +13,7 @@ class MainWindow;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-    bool isConn;
+
     void readReady();
     void onStateChanged(int state);
 
