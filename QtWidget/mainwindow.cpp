@@ -32,6 +32,16 @@ void MainWindow::readReady()
     reply->deleteLater();
 }
 
+void MainWindow::onStateChanged(int state)
+{
+    if (state == QModbusDevice::UnconnectedState)
+        ui->label->setText("Desconectado");
+    else if (state == QModbusDevice::ConnectedState)
+        ui->label->setText("Conectado");
+
+    qDebug() << "Estado " << state;
+}
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -67,14 +77,6 @@ void MainWindow::on_connButton_clicked()
     if (!modbusDevice)
         return;
 
-    QString addr = ui->textEdit->toPlainText();
-
-    if (addr.isEmpty())
-    {
-        addr = "cuki-pc:502";
-        ui->textEdit->setText(addr);
-    }
-
     if (modbusDevice->state() == QModbusDevice::ConnectedState)
     {
         modbusDevice->disconnectDevice();
@@ -84,26 +86,23 @@ void MainWindow::on_connButton_clicked()
     }
     else
     {
+        QString addr = ui->textEdit->toPlainText();
+
+        if (addr.isEmpty())
+        {
+            addr = "cuki-pc:502";
+            ui->textEdit->setText(addr);
+        }
+
         const QUrl url = QUrl::fromUserInput(addr);
+
         modbusDevice->setConnectionParameter(QModbusDevice::NetworkPortParameter, url.port());
         modbusDevice->setConnectionParameter(QModbusDevice::NetworkAddressParameter, url.host());
-        QString msg = "Conectando a " + url.host() + ":" + QString::number(url.port()) + '\n';
+
         qDebug() << "Conectando a" << url.host() << ":" << url.port();
+        ui->label->setText("Conectando a " + url.host() + ":" + QString::number(url.port()));
         modbusDevice->connectDevice();
-
-        if (!modbusDevice->connectDevice())
-        {
-            qDebug() << "Falha na conexao";
-            msg += "Falha na conexao";
-        }
-        else
-        {
-            qDebug() << "Conectado com sucesso";
-            isConn = true;
-            msg += "Conectado com sucesso";
-        }
-
-        ui->label->setText(msg);
+        connect(modbusDevice, &QModbusClient::stateChanged, this, &MainWindow::onStateChanged);
     }
 }
 

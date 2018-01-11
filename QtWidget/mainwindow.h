@@ -15,6 +15,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
     bool isConn;
     void readReady();
+    void onStateChanged(int state);
 
 public:
     explicit MainWindow(QWidget *parent = 0);
