@@ -60,6 +60,19 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QPushButton" name="irrigaButton">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>50</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Irrigar</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
     <item row="2" column="0" colspan="2">

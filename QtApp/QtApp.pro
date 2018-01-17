@@ -1,17 +1,15 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2017-12-21T07:18:13
+# Project created by QtCreator 2017-12-04T13:11:55
 #
 #-------------------------------------------------
 
 QT       += core gui
+QT       += serialport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-QT += serialbus
-#QT += serialport
-
-TARGET = QtWidget
+TARGET = QtApp
 TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use
@@ -28,17 +26,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp \
-    mapa_memoria.cpp
+        mainwindow.cpp
 
 HEADERS += \
-        mainwindow.h \
-    mapa_memoria.h
+        mainwindow.h
 
 FORMS += \
         mainwindow.ui
-
-CONFIG += mobility
-CONFIG += c++11
-MOBILITY = 
-

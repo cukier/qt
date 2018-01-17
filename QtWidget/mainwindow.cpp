@@ -6,6 +6,15 @@
 #include <QUrl>
 #include <QModbusTcpClient>
 
+#define _BV(x)      (1<<x)
+#define SET(x,y)    (x |= _BV(y))
+#define RESET(x,y)  (x &= ~(_BV(y)))
+#define IS(x,y)     ((x) & (_BV(y)))
+
+#define INICIO_I    9
+#define INICIO_AUX  6
+#define PARAR_I     14
+
 void MainWindow::readReady()
 {
     auto reply = qobject_cast<QModbusReply *>(sender());
@@ -27,6 +36,8 @@ void MainWindow::readReady()
             ui->label->setText(ui->label->text() + entry);
             qDebug() << entry;
         }
+
+        w0 = unit.value(0);
     }
 
     reply->deleteLater();
@@ -40,6 +51,58 @@ void MainWindow::onStateChanged(int state)
         ui->label->setText("Conectado");
 
     qDebug() << "Estado " << state;
+}
+
+void MainWindow::inicio() const
+{
+    auto reply = qobject_cast<QModbusReply *>(sender());
+
+    if (!reply)
+        return;
+
+    if (reply->error() == QModbusDevice::ProtocolError)
+    {
+        ui->label->setText("Erro na escrita" +
+                           reply->errorString() +
+                           reply->rawResult().exceptionCode());
+    }
+    else if (reply->error() != QModbusDevice::NoError)
+    {
+        ui->label->setText("Erro na escrita" +
+                           reply->errorString() +
+                           reply->error());
+    }
+
+    reply->deleteLater();
+}
+
+void MainWindow::readModbus(unsigned short addr_slv,
+                            unsigned short start_addr,
+                            unsigned short qtd)
+{
+    if (!modbusDevice)
+        return;
+
+    auto *reply = modbusDevice->sendReadRequest(
+                QModbusDataUnit(QModbusDataUnit::HoldingRegisters,
+                                start_addr, qtd), addr_slv);
+
+    QString str;
+
+    if (!reply)
+    {
+        str = "Erro de resposta\n" + modbusDevice->errorString();
+        qDebug() << str;
+    }
+    else
+    {
+        if (!reply->isFinished())
+            connect(reply, &QModbusReply::finished, this, &MainWindow::readReady);
+        else
+            delete reply;
+    }
+
+    ui->label->setText(str);
 }
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -88,7 +151,7 @@ void MainWindow::on_connButton_clicked()
 
         if (addr.isEmpty())
         {
-            addr = "cuki-pc:502";
+            addr = "127.0.0.1:502";
             ui->textEdit->setText(addr);
         }
 
@@ -106,25 +169,45 @@ void MainWindow::on_connButton_clicked()
 
 void MainWindow::on_readButton_clicked()
 {
+    MainWindow::readModbus(1, 0, 10);
+}
+
+void MainWindow::on_irrigaButton_clicked()
+{
     if (!modbusDevice)
         return;
 
-    auto *reply = modbusDevice->sendReadRequest(QModbusDataUnit(QModbusDataUnit::HoldingRegisters, 0, 10), 1);
+    MainWindow::readModbus(1, 0, 10);
 
-    QString str;
+    QModbusDataUnit writeUnit = QModbusDataUnit(QModbusDataUnit::HoldingRegisters, 0, 1);
 
-    if (!reply)
+    if(IS(w0, INICIO_I))
     {
-        str = "Erro de resposta\n" + modbusDevice->errorString();
-        qDebug() << str;
+        SET(w0, PARAR_I);
     }
     else
     {
-        if (!reply->isFinished())
-            connect(reply, &QModbusReply::finished, this, &MainWindow::readReady);
-        else
-            delete reply;
+        SET(w0, INICIO_I);
+        SET(w0, INICIO_AUX);
     }
 
-    ui->label->setText(str);
+    writeUnit.setValue(0, w0);
+
+    auto *reply = modbusDevice->sendWriteRequest(writeUnit, 1);
+
+    if (reply)
+    {
+        if (!reply->isFinished())
+        {
+            connect(reply, &QModbusReply::finished, this, &MainWindow::inicio);
+        }
+        else
+        {
+            reply->deleteLater();
+        }
+    }
+    else
+    {
+        ui->label->setText("Erro de escrita" + modbusDevice->errorString());
+    }
 }

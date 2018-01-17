@@ -1,6 +1,6 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2017-12-21T07:18:13
+# Project created by QtCreator 2018-01-15T16:18:25
 #
 #-------------------------------------------------
 
@@ -8,10 +8,7 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-QT += serialbus
-#QT += serialport
-
-TARGET = QtWidget
+TARGET = ListView
 TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use
@@ -28,17 +25,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp \
-    mapa_memoria.cpp
+        mainwindow.cpp
 
 HEADERS += \
-        mainwindow.h \
-    mapa_memoria.h
+        mainwindow.h
 
 FORMS += \
         mainwindow.ui
 
-CONFIG += mobility
-CONFIG += c++11
-MOBILITY = 
-
+RESOURCES += \
+    icons.qrc
