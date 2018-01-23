@@ -1,15 +1,16 @@
 #include <QCoreApplication>
+#include <QTimer>
+
 #include "encoder.h"
 
 int main(int argc, char *argv[])
 {
-//    QCoreApplication a(argc, argv);
-    Encoder e(argc, argv);
+    QCoreApplication app(argc, argv);
 
-//    QObject::connect(&e, SIGNAL(finished()), &a, SLOT(QCoreApplication::quit()));
+    Encoder e;
 
-    e.simular();
-//    QCoreApplication::quit();
-//    return a.exec();
-    return e.exec();
+    QObject::connect(&e, SIGNAL(finished()), &app, SLOT(quit()));
+    QTimer::singleShot(10, &e, SLOT(simular()));
+
+    return app.exec();
 }

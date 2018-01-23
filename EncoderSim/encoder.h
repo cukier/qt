@@ -7,26 +7,27 @@
 #include <QSerialPort>
 #include <QCoreApplication>
 
-class Encoder : public QCoreApplication
+class Encoder : public QObject
 {
     Q_OBJECT
 
 public:
-    Encoder(int argc, char **argv);
+    explicit Encoder(QObject *parent = 0);
     ~Encoder();
 
+    void quit();
+signals:
+    void finished();
+public slots:
     void simular();
 private:
     QSerialPort *serialPort;
+    QCoreApplication *app;
 
     bool conectar();
     bool fechar();
     void readReady();
     void writeReady();
-//signals:
-//    void finished();
-private slots:
-    void endOfProgram();
 };
 
 #endif // ENCODER_H

@@ -4,11 +4,11 @@
 #include <QSerialPort>
 #include <QDebug>
 
-Encoder::Encoder(int argc, char** argv)
-    : QCoreApplication(argc, argv)
+Encoder::Encoder(QObject *parent)
+    : QObject(parent)
 {
     serialPort = nullptr;
-    connect(this, SIGNAL(aboutToQuit()), SLOT(endOfProgram()));
+    app = QCoreApplication::instance();
 }
 
 Encoder::~Encoder()
@@ -16,12 +16,17 @@ Encoder::~Encoder()
     delete serialPort;
 }
 
+void Encoder::quit()
+{
+    emit finished();
+}
+
 void Encoder::simular()
 {
     qDebug() << "Simulacao...";
     qDebug() << Encoder::conectar();
     qDebug() << Encoder::fechar();
-    QCoreApplication::exec();
+    quit();
 }
 
 bool Encoder::conectar()
@@ -48,9 +53,4 @@ bool Encoder::fechar()
     serialPort->close();
 
     return serialPort->isOpen();
-}
-
-void Encoder::endOfProgram()
-{
-
 }
