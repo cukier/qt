@@ -33,17 +33,21 @@ bool Encoder::conectar()
 {
     bool ret = false;
 
-    if (!serialPort)
+    if (serialPort)
     {
-        serialPort = new QSerialPort();
-        serialPort->setPortName("COM5");
-        serialPort->setBaudRate(QSerialPort::Baud19200);
-        serialPort->setDataBits(QSerialPort::Data8);
-        serialPort->setParity(QSerialPort::NoParity);
-        serialPort->setStopBits(QSerialPort::OneStop);
-        serialPort->open(QIODevice::ReadOnly);
-        ret = serialPort->isOpen();
+        delete serialPort;
+        serialPort = nullptr;
     }
+
+
+    serialPort = new QSerialPort();
+    serialPort->setPortName("COM5");
+    serialPort->setBaudRate(QSerialPort::Baud19200);
+    serialPort->setDataBits(QSerialPort::Data8);
+    serialPort->setParity(QSerialPort::NoParity);
+    serialPort->setStopBits(QSerialPort::OneStop);
+    serialPort->open(QIODevice::ReadOnly);
+    ret = serialPort->isOpen();
 
     return ret;
 }
