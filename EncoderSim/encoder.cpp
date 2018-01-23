@@ -37,7 +37,7 @@ bool Encoder::conectar()
     {
         serialPort = new QSerialPort();
         serialPort->setPortName("COM5");
-        serialPort->setBaudRate(19200);
+        serialPort->setBaudRate(QSerialPort::Baud19200);
         serialPort->setDataBits(QSerialPort::Data8);
         serialPort->setParity(QSerialPort::NoParity);
         serialPort->setStopBits(QSerialPort::OneStop);
