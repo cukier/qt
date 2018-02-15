@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>274</width>
-    <height>210</height>
+    <height>239</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -64,23 +64,11 @@
         <string/>
        </property>
        <property name="textAlignment">
-        <set>AlignCenter</set>
+        <set>AlignLeading|AlignVCenter</set>
        </property>
        <property name="icon">
         <iconset resource="ico.qrc">
          <normaloff>:/ico/t2.png</normaloff>:/ico/t2.png</iconset>
-       </property>
-      </item>
-      <item>
-       <property name="icon">
-        <iconset>
-         <normaloff>ico/t1.png</normaloff>ico/t1.png</iconset>
-       </property>
-      </item>
-      <item>
-       <property name="icon">
-        <iconset>
-         <normaloff>ico/t3.png</normaloff>ico/t3.png</iconset>
        </property>
       </item>
       <item>
@@ -90,6 +78,24 @@
        </property>
       </item>
      </widget>
+    </item>
+    <item row="1" column="0">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QPushButton" name="pushButton_2">
+        <property name="text">
+         <string>Novo</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButton">
+        <property name="text">
+         <string>Remover</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>
