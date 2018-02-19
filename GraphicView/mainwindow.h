@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QTimer>
+#include <QGraphicsScene>
 
 namespace Ui {
 class MainWindow;
@@ -29,6 +30,7 @@ protected:
 
 private:
     Ui::MainWindow *ui;
+    QGraphicsScene *scene;
     QTimer *timer;
 
     qreal angulo;
