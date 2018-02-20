@@ -18,10 +18,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     scene = new QGraphicsScene(this);
+    ui->graphicsView->setMinimumSize(Raio * 2.5, Raio * 2.5);
     ui->graphicsView->setScene(scene);
 
     timer = new QTimer();
-    timer->start(100);
+    timer->start(10);
 
     angulo = 0;
 
@@ -41,24 +42,36 @@ MainWindow::~MainWindow()
 
 void MainWindow::paintEvent(QPaintEvent *)
 {
-    //    QPainter painter(this);
-    QPoint centro(Centro, Centro);
-    QPoint fim(0, 0);
+    //    QPoint fim(0, 0);
+    qreal diam = Raio << 1;
     QPen pen;
-    QRect elip(0, 0, Raio << 1, Raio << 1);
-    QLineF li(0, 0, Raio, Raio);
+    QRect elip(0, 0, diam, diam);
+    QLineF li;
 
     angulo += 0.25;
 
     if (angulo == 360)
+    {
         angulo = 0;
+        timer->stop();
+    }
 
-    fim.setX((int) ((qCos(qDegreesToRadians(angulo)) * Raio) + Centro));
-    fim.setY((int) ((qSin(qDegreesToRadians(angulo)) * Raio) + Centro));
+    //    li.setAngle(angulo);
+    //    li.setLength(Raio);
+    li.setP1(QPoint(Raio, Raio));
+    li.setP2(QPoint(((qCos(qDegreesToRadians(angulo)) * Raio) + Raio),
+                    ((qSin(qDegreesToRadians(angulo)) * Raio)) + Raio));
 
-    pen.setStyle(Qt::DashDotLine);
+    //    fim.setX((int) (qCos(qDegreesToRadians(angulo)) * Raio));
+    //    fim.setY((int) (qSin(qDegreesToRadians(angulo)) * Raio));
+    //    li.setP1(QPoint(Raio, Raio));
+    //    li.setLength(diam);
+    //    li.setAngle(angulo);
+
+
+    //    pen.setStyle(Qt::DashDotLine);
     pen.setWidth(3);
-    pen.setBrush(Qt::green);
+    //    pen.setBrush(Qt::green);
     pen.setCapStyle(Qt::RoundCap);
     pen.setJoinStyle(Qt::RoundJoin);
 
@@ -68,8 +81,9 @@ void MainWindow::paintEvent(QPaintEvent *)
     //    qDebug() << angulo;
     //    scene->addLine(0, 0, (int) angulo, (int) angulo, pen);
     //    scene->addEllipse(centro.x(), centro.y(), Raio, Raio, pen, Qt::NoBrush);
+    scene->clear();
     scene->addEllipse(elip, pen, Qt::NoBrush);
     scene->addLine(li, pen);
-//    scene->addLine((qreal) centro.x(),(qreal) centro.y(),(qreal) fim.x(),(qreal) fim.y(), pen);
+    //    scene->addLine((qreal) centro.x(),(qreal) centro.y(),(qreal) fim.x(),(qreal) fim.y(), pen);
     qDebug() << angulo;
 }
