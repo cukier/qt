@@ -53,30 +53,29 @@ void Pizza::drawPosition()
 
 void Pizza::drawSec()
 {
-    QLineF li;
+    qreal diam;
     qreal sum;
+    int cor = Qt::darkGray;
+
+    if (raio <= 0)
+        raio = 200;
+
+    diam = raio << 1;
+    sum = 0;
+    addEllipse(QRect(0, 0, diam, diam), pen,QBrush(Qt::green));
 
     if (angulos.size() <= 0)
         return;
 
-    pen.setBrush(Qt::blue);
-
-    sum = 0;
-    li.setP1(QPoint(raio, raio));
-    li.setP2(QPoint(((qCos(qDegreesToRadians(0.0)) * raio) + raio),
-                    ((qSin(qDegreesToRadians(0.0)) * raio)) + raio));
-    addLine(li, pen);
-
-    for(qreal ang : angulos)
+    for (auto ang : angulos)
     {
         sum += ang;
-
-        while (sum >= 360)
-            sum -= 360;
-
-        li.setP2(QPoint(((qCos(qDegreesToRadians(sum)) * raio) + raio),
-                        ((qSin(qDegreesToRadians(sum)) * raio)) + raio));
-        addLine(li, pen);
+        cor++;
+        pen.setBrush((Qt::GlobalColor) cor);
+        QGraphicsEllipseItem *elip =
+                addEllipse(QRect(0, 0, diam, diam), pen,(Qt::GlobalColor) cor);
+        elip->setStartAngle((int) (sum - ang));
+        elip->setSpanAngle(ang);
     }
 }
 
@@ -88,10 +87,10 @@ void Pizza::drawCircle()
         raio = 200;
 
     pen.setBrush(Qt::darkGreen);
-//    pen.setColor(Qt::darkGreen);
+    //    pen.setColor(Qt::darkGreen);
     diam = raio << 1;
     addEllipse(QRect(0, 0, diam, diam),
-                pen, QBrush(Qt::green));
+               pen, Qt::NoBrush);
 }
 
 void Pizza::insertSector(qreal angulo)
