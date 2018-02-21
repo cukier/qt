@@ -87,10 +87,11 @@ void Pizza::drawCircle()
     if (raio <= 0)
         raio = 200;
 
-    pen.setBrush(Qt::green);
+    pen.setBrush(Qt::darkGreen);
+//    pen.setColor(Qt::darkGreen);
     diam = raio << 1;
-    QRect elip(0, 0, diam, diam);
-    addEllipse(elip, pen, Qt::NoBrush);
+    addEllipse(QRect(0, 0, diam, diam),
+                pen, QBrush(Qt::green));
 }
 
 void Pizza::insertSector(qreal angulo)
