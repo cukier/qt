@@ -15,7 +15,21 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    QPen pen;
+
+    //    pen.setStyle(Qt::DashDotLine);
+    pen.setWidth(3);
+    //    pen.setBrush(Qt::green);
+    pen.setCapStyle(Qt::RoundCap);
+    pen.setJoinStyle(Qt::RoundJoin);
+
     scene = new Pizza(this);
+    scene->config(Raio, 0, pen);
+    scene->insertSector(25);
+    scene->insertSector(60);
+    scene->insertSector(144);
+    scene->insertSector(250);
+
     ui->graphicsView->setMinimumSize(Raio * 2.5, Raio * 2.5);
     ui->graphicsView->setScene(scene);
 
@@ -25,7 +39,6 @@ MainWindow::MainWindow(QWidget *parent) :
     angulo = 0;
 
     connect(timer, SIGNAL(timeout()), this, SLOT(update()));
-    //    setMinimumSize(QSize(TamanhoMinimoH, TamanhoMinimoW));
 }
 
 MainWindow::~MainWindow()
@@ -40,8 +53,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::paintEvent(QPaintEvent *)
 {
-    QPen pen;
-
     angulo += 0.25;
 
     if (angulo == 360)
@@ -50,12 +61,9 @@ void MainWindow::paintEvent(QPaintEvent *)
         timer->stop();
     }
 
-
-    //    pen.setStyle(Qt::DashDotLine);
-    pen.setWidth(3);
-    //    pen.setBrush(Qt::green);
-    pen.setCapStyle(Qt::RoundCap);
-    pen.setJoinStyle(Qt::RoundJoin);
-
-    scene->drawPosition(Raio, angulo, pen);
+    scene->setAngulo(angulo);
+    scene->clear();
+    scene->drawCircle();
+    scene->drawSec();
+    scene->drawPosition();
 }

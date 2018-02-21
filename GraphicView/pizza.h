@@ -7,8 +7,22 @@
 class Pizza : public QGraphicsScene
 {
 public:
-    Pizza(QObject *parent = Q_NULLPTR) : QGraphicsScene(parent) {}
-    void drawPosition(int radio, qreal angulo, QPen pen);
+    Pizza(QObject *parent = Q_NULLPTR);
+
+    void config(int raio, qreal angulo, QPen pen);
+    void setAngulo(qreal angulo);
+    void setRaio(int raio);
+    void setPen(QPen pen);
+    void drawPosition();
+    void drawSec();
+    void drawCircle();
+    void insertSector(qreal angulo);
+
+private:
+    QPen pen;
+    qreal angulo;
+    int raio;
+    QVector<qreal> angulos;
 };
 
 #endif // PIZZA_H
