@@ -55,7 +55,7 @@ void Pizza::drawSec()
 {
     qreal diam;
     qreal sum;
-    int cor = Qt::darkGray;
+    int cor = Qt::blue;
 
     if (raio <= 0)
         raio = 200;
@@ -75,7 +75,7 @@ void Pizza::drawSec()
         QGraphicsEllipseItem *elip =
                 addEllipse(QRect(0, 0, diam, diam), pen,(Qt::GlobalColor) cor);
         elip->setStartAngle((int) (sum - ang));
-        elip->setSpanAngle(ang);
+        elip->setSpanAngle((int) ang);
     }
 }
 

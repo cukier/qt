@@ -25,8 +25,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     scene = new Pizza(this);
     scene->config(Raio, 0, pen);
-    scene->insertSector(25);
-    scene->insertSector(60);
+    scene->insertSector(120);
+//    scene->insertSector(60);
 //    scene->insertSector(144);
 //    scene->insertSector(250);
 
@@ -64,6 +64,6 @@ void MainWindow::paintEvent(QPaintEvent *)
     scene->setAngulo(angulo);
     scene->clear();
     scene->drawSec();
-    scene->drawCircle();
+//    scene->drawCircle();
     scene->drawPosition();
 }
