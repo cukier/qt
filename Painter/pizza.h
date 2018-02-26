@@ -5,7 +5,7 @@
 #include <QPainter>
 #include <QVector>
 
-class Pizza : QPainter
+class Pizza : public QPainter
 {
 public:
     Pizza(QPaintDevice *device);
