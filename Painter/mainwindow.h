@@ -23,7 +23,6 @@ protected:
 
 private:
     Ui::MainWindow *ui;
-    Pizza *painter;
     QTimer *timer;
 
     qreal angulo;
