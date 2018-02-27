@@ -2,6 +2,7 @@
 
 #include <QtCore/QtMath>
 #include <QGraphicsEllipseItem>
+#include <QPainter>
 
 Pizza::Pizza(QObject *parent) : QGraphicsScene(parent)
 {
@@ -96,4 +97,16 @@ void Pizza::drawCircle()
 void Pizza::insertSector(qreal angulo)
 {
     angulos.push_back(angulo);
+}
+
+void Pizza::drawElip()
+{
+    QPainter painter;
+
+    painter.setPen(Qt::black);
+    painter.setBrush(Qt::NoBrush);
+    painter.setRenderHint(QPainter::Antialiasing, true);
+    painter.save();
+    painter.drawPie(QRect(10, 10, 100, 100), 0, 160);
+    painter.restore();
 }

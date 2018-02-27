@@ -17,6 +17,7 @@ public:
     void drawSec();
     void drawCircle();
     void insertSector(qreal angulo);
+    void drawElip();
 
 private:
     QPen pen;

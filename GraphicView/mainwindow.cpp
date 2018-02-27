@@ -28,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent) :
     scene->insertSector(120);
     scene->insertSector(60);
     scene->insertSector(144);
-//    scene->insertSector(44);
+    //    scene->insertSector(44);
 
     ui->graphicsView->setMinimumSize(Raio * 2.5, Raio * 2.5);
     ui->graphicsView->setScene(scene);
@@ -61,9 +61,10 @@ void MainWindow::paintEvent(QPaintEvent *)
         timer->stop();
     }
 
-    scene->setAngulo(angulo);
-    scene->clear();
-    scene->drawSec();
+    //    scene->setAngulo(angulo);
+    //    scene->clear();
+    //    scene->drawSec();
     //    scene->drawCircle();
-//    scene->drawPosition();
+    //    scene->drawPosition();
+    scene->drawElip();
 }
