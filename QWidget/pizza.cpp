@@ -6,7 +6,8 @@
 
 Pizza::Pizza(QWidget *parent) :
     QWidget(parent),
-    timer(new QTimer)
+    timer(new QTimer),
+    view(nullptr)
 {
     connect(timer, SIGNAL(timeout()), this, SLOT(update()));
     timer->start(200);
@@ -22,8 +23,16 @@ Pizza::~Pizza()
     delete timer;
 }
 
+void Pizza::setView(QGraphicsView *i_view)
+{
+    this->view = i_view;
+}
+
 void Pizza::paintEvent(QPaintEvent */*event*/)
 {
+    if (!view)
+        return;
+
     QPen pen;
     pen.setWidth(3);
     //    pen.setBrush(Qt::green);
@@ -35,12 +44,12 @@ void Pizza::paintEvent(QPaintEvent */*event*/)
     brush = Qt::NoBrush;
 
     QRect rect(10, 20, 200, 200);
-//    QRect rect(10, 20, 80, 60);
+    //    QRect rect(10, 20, 80, 60);
 
     int startAngle = 20 * 16;
     int arcLength = (20 + angulo) * 16;
 
-    QPainter painter(this);
+    QPainter painter(view);
     painter.setPen(pen);
     painter.setBrush(brush);
     painter.setRenderHint(QPainter::Antialiasing, true);

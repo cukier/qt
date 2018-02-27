@@ -10,11 +10,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     pizza = new Pizza;
-
-//    QGridLayout *mainLayout = new QGridLayout;
-//    mainLayout->addWidget(pizza, 0, 0, 1, 1);
-
-//    setLayout(mainLayout);
+    pizza->setView(ui->graphicsView);
 
     ui->gridLayout->addWidget(pizza, 0, 0, 1, 1);
 }
