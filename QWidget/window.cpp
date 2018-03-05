@@ -10,6 +10,7 @@ window::window(QWidget *parent) : QWidget(parent)
 
     pizza->setRaio(150);
     pizza->inSec(40.0);
+    pizza->inSec(87.2);
     pizza->setAngulo(32.5);
 
     mainLayout->addWidget(pizza);

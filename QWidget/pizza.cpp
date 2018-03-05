@@ -74,32 +74,24 @@ void Pizza::drawSec(QPainter *painter)
 
     aux = m_raio + 10;
 
-    m_brush.setColor(Qt::green);
-    m_pen.setBrush(m_brush);
     QPointF c(aux, aux);
     painter->setBrush(m_brush);
     painter->drawEllipse(c, m_raio, m_raio);
 
-    //    qreal diam;
-    //    qreal sum;
-    //    int cor = Qt::blue;
+    qreal sum;
 
-    //    diam = aux * 2;
-    //    sum = 0;
+    sum = 0;
 
-    //    if (m_angulos.size() <= 0)
-    //        return;
+    if (m_angulos.size() <= 0)
+        return;
 
-    //    QRect rect(m_raio, m_raio, diam, diam);
+    QRect rect(10, 10, m_raio * 2, m_raio * 2);
 
-    //    for (auto ang : m_angulos)
-    //    {
-    //        sum += ang;
-    //        cor++;
-    //        m_pen.setBrush((Qt::GlobalColor) cor);
-    //        painter->setPen(m_pen);
-    //        painter->drawPie(rect, (sum - ang) * 16, ang * 16);
-    //    }
+    for (auto ang : m_angulos)
+    {
+        sum += ang;
+        painter->drawPie(rect, (sum - ang) * 16, ang * 16);
+    }
 }
 
 void Pizza::inSec(qreal angulo)
