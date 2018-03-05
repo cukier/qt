@@ -14,16 +14,11 @@ public:
     Pizza(QWidget *parent = Q_NULLPTR);
     ~Pizza();
 
-    void setView(QGraphicsView *i_view);
-
 protected:
     void paintEvent(QPaintEvent *event) override;
 
 private:
-    QTimer *timer;
-    QGraphicsView *view;
-
-    int angulo;
+    int angulo = 0;
 };
 
 #endif // PIZZA_H

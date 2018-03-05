@@ -9,10 +9,12 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    pizza = new Pizza;
-    pizza->setView(ui->graphicsView);
+    Pizza *pizza = new Pizza;
+    QGridLayout *mainLayout = new QGridLayout;
 
-    ui->gridLayout->addWidget(pizza, 0, 0, 1, 1);
+    mainLayout->addWidget(pizza);
+    setLayout(mainLayout);
+    pizza->update();
 }
 
 MainWindow::~MainWindow()

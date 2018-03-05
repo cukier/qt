@@ -5,60 +5,34 @@
 #include <QDebug>
 
 Pizza::Pizza(QWidget *parent) :
-    QWidget(parent),
-    timer(new QTimer),
-    view(nullptr)
+    QWidget(parent)
 {
-    connect(timer, SIGNAL(timeout()), this, SLOT(update()));
-    timer->start(200);
 
-    angulo = 0;
 }
 
 Pizza::~Pizza()
 {
-    if (timer)
-        timer->stop();
-
-    delete timer;
-}
-
-void Pizza::setView(QGraphicsView *i_view)
-{
-    this->view = i_view;
 }
 
 void Pizza::paintEvent(QPaintEvent */*event*/)
 {
-    if (!view)
-        return;
+    QRect rect(10, 20, 80, 60);
+    int startAngle = 20 * 16;
+    int arcLength = 120 * 16;
 
     QPen pen;
     pen.setWidth(3);
-    //    pen.setBrush(Qt::green);
-    //    pen.setStyle(Qt::DashDotLine);
     pen.setCapStyle(Qt::RoundCap);
     pen.setJoinStyle(Qt::RoundJoin);
 
-    QBrush brush;
-    brush = Qt::NoBrush;
+    QBrush brush(Qt::NoBrush);
 
-    QRect rect(10, 20, 200, 200);
-    //    QRect rect(10, 20, 80, 60);
-
-    int startAngle = 20 * 16;
-    int arcLength = (20 + angulo) * 16;
-
-    QPainter painter(view);
+    QPainter painter(this);
     painter.setPen(pen);
     painter.setBrush(brush);
     painter.setRenderHint(QPainter::Antialiasing, true);
-    painter.save();
-    painter.translate(0, 0);
+//    painter.save();
     painter.drawPie(rect, startAngle, arcLength);
-    painter.restore();
-
-    angulo++;
-
-    qDebug() << "Paint";
+//    painter.restore();
+    qDebug() << "update";
 }

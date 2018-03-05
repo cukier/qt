@@ -4,6 +4,7 @@
 #include "pizza.h"
 
 #include <QMainWindow>
+#include <QGridLayout>
 
 namespace Ui {
 class MainWindow;
@@ -19,7 +20,7 @@ public:
 
 private:
     Ui::MainWindow *ui;
-    Pizza *pizza;
+
 };
 
 #endif // MAINWINDOW_H
