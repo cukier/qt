@@ -8,10 +8,10 @@ window::window(QWidget *parent) : QWidget(parent)
     Pizza *pizza = new Pizza;
     QGridLayout *mainLayout = new QGridLayout(this);
 
+    pizza->setRaio(150);
+    pizza->inSec(40.0);
+    pizza->setAngulo(32.5);
+
     mainLayout->addWidget(pizza);
     setLayout(mainLayout);
-
-    timer.start(1000);
-
-    connect(&timer, SIGNAL(timeout()), this, SLOT(update()));
 }

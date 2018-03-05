@@ -15,7 +15,6 @@ signals:
 public slots:
 
 private:
-    QTimer ;
 };
 
 #endif // WINDOW_H
