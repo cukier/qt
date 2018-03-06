@@ -8,6 +8,7 @@
 Pizza::Pizza(QWidget *parent) :
     QWidget(parent)
 {
+    m_angulos.clear();
 }
 
 Pizza::~Pizza()
@@ -29,23 +30,21 @@ void Pizza::setRaio(int raio)
 void Pizza::paintEvent(QPaintEvent */*event*/)
 {
     QPainter painter(this);
+    QPen pen;
+    QBrush brush;
 
-    qreal aux;
+    int cor = Qt::darkGreen;
+    int pixelsOffset = 10;
 
     if (m_raio <= 0)
         m_raio = 200;
 
-    aux = m_raio + 10;
 
-    QPointF c(aux, aux);
-    int cor = Qt::darkGreen;
 
-    QPen pen;
     pen.setWidth(3);
     pen.setCapStyle(Qt::RoundCap);
     pen.setJoinStyle(Qt::RoundJoin);
 
-    QBrush brush;
     brush.setStyle(Qt::SolidPattern);
 
 
@@ -59,7 +58,7 @@ void Pizza::paintEvent(QPaintEvent */*event*/)
         if (m_angulos.size() <= 0)
             return;
 
-        QRect rect(10, 10, m_raio * 2, m_raio * 2);
+        QRect rect(pixelsOffset, pixelsOffset, m_raio * 2, m_raio * 2);
 
         for (auto ang : m_angulos)
         {
@@ -80,12 +79,30 @@ void Pizza::paintEvent(QPaintEvent */*event*/)
     }
     else
     {
+        int aux;
+
+        aux = m_raio + pixelsOffset;
+
+        QPointF c(aux, aux);
+
         pen.setColor(Qt::darkGreen);
         brush.setColor(Qt::darkGreen);
         painter.setBrush(brush);
         painter.setPen(pen);
         painter.drawEllipse(c, m_raio, m_raio);
     }
+
+    int aux = m_raio + pixelsOffset;
+    QPointF centro(aux, aux);
+    qreal pos_y = (qCos(qDegreesToRadians(m_angulo)) * m_raio) + aux;
+    qreal pos_x = (qSin(qDegreesToRadians(m_angulo)) * m_raio) + aux;
+    QPointF fim(pos_x, pos_y);
+
+    pen.setColor(Qt::red);
+    brush.setColor(Qt::red);
+    painter.setPen(pen);
+    painter.setBrush(brush);
+    painter.drawLine(centro, fim);
 }
 
 void Pizza::inserirSetor(qreal angulo)
