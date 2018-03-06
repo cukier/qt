@@ -39,15 +39,11 @@ void Pizza::paintEvent(QPaintEvent */*event*/)
     if (m_raio <= 0)
         m_raio = 200;
 
-
-
     pen.setWidth(3);
     pen.setCapStyle(Qt::RoundCap);
     pen.setJoinStyle(Qt::RoundJoin);
 
     brush.setStyle(Qt::SolidPattern);
-
-
 
     if (m_angulos.size())
     {
