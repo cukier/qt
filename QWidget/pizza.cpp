@@ -23,8 +23,8 @@ void Pizza::setAngulo(qreal angulo)
 void Pizza::setRaio(int raio)
 {
     m_raio = raio;
-    setMinimumHeight(raio * 2 + 20);
-    setMinimumWidth(raio * 2 + 20);
+    setMinimumHeight((raio + PixelOffset) * 2);
+    setMinimumWidth((raio + PixelOffset) * 2);
 }
 
 void Pizza::paintEvent(QPaintEvent */*event*/)
@@ -34,7 +34,6 @@ void Pizza::paintEvent(QPaintEvent */*event*/)
     QBrush brush;
 
     int cor = Qt::darkGreen;
-    int pixelsOffset = 10;
 
     if (m_raio <= 0)
         m_raio = 200;
@@ -45,6 +44,8 @@ void Pizza::paintEvent(QPaintEvent */*event*/)
 
     brush.setStyle(Qt::SolidPattern);
 
+    painter.setRenderHint(QPainter::Antialiasing, true);
+
     if (m_angulos.size())
     {
         qreal sum;
@@ -54,7 +55,7 @@ void Pizza::paintEvent(QPaintEvent */*event*/)
         if (m_angulos.size() <= 0)
             return;
 
-        QRect rect(pixelsOffset, pixelsOffset, m_raio * 2, m_raio * 2);
+        QRectF rect(PixelOffset, PixelOffset, m_raio * 2, m_raio * 2);
 
         for (auto ang : m_angulos)
         {
@@ -67,18 +68,18 @@ void Pizza::paintEvent(QPaintEvent */*event*/)
             ++cor;
         }
 
-        pen.setColor(Qt::darkGreen);
-        brush.setColor(Qt::darkGreen);
-        painter.setBrush(brush);
-        painter.setPen(pen);
-        painter.drawPie(rect, sum * 16, (360 - sum) * 16);
+        if (sum < 360)
+        {
+            pen.setColor(Qt::darkGreen);
+            brush.setColor(Qt::darkGreen);
+            painter.setBrush(brush);
+            painter.setPen(pen);
+            painter.drawPie(rect, sum * 16, (360 - sum) * 16);
+        }
     }
     else
     {
-        int aux;
-
-        aux = m_raio + pixelsOffset;
-
+        int aux = m_raio + PixelOffset;
         QPointF c(aux, aux);
 
         pen.setColor(Qt::darkGreen);
@@ -88,7 +89,7 @@ void Pizza::paintEvent(QPaintEvent */*event*/)
         painter.drawEllipse(c, m_raio, m_raio);
     }
 
-    int aux = m_raio + pixelsOffset;
+    int aux = m_raio + PixelOffset;
     QPointF centro(aux, aux);
     qreal pos_y = (qCos(qDegreesToRadians(m_angulo)) * m_raio) + aux;
     qreal pos_x = (qSin(qDegreesToRadians(m_angulo)) * m_raio) + aux;

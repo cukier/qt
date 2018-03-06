@@ -23,6 +23,10 @@ protected:
     void paintEvent(QPaintEvent *event) override;
 
 private:
+    enum PixelsSize {
+        PixelOffset = 10
+    };
+
     qreal m_angulo = 0;
     int m_raio = 0;
     QVector<qreal> m_angulos;
