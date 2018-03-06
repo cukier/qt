@@ -52,10 +52,9 @@ void Pizza::paintEvent(QPaintEvent */*event*/)
 
         sum = 0;
 
-        if (m_angulos.size() <= 0)
-            return;
-
-        QRectF rect(PixelOffset, PixelOffset, m_raio * 2, m_raio * 2);
+        qreal rectAux = m_raio * 2;
+        QRectF rect(PixelOffset, PixelOffset, rectAux, rectAux);
+        cor = Qt::blue;
 
         for (auto ang : m_angulos)
         {
@@ -80,13 +79,12 @@ void Pizza::paintEvent(QPaintEvent */*event*/)
     else
     {
         int aux = m_raio + PixelOffset;
-        QPointF c(aux, aux);
 
         pen.setColor(Qt::darkGreen);
         brush.setColor(Qt::darkGreen);
         painter.setBrush(brush);
         painter.setPen(pen);
-        painter.drawEllipse(c, m_raio, m_raio);
+        painter.drawEllipse(QPointF(aux, aux), m_raio, m_raio);
     }
 
     int aux = m_raio + PixelOffset;
