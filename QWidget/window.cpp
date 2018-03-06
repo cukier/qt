@@ -9,8 +9,10 @@ window::window(QWidget *parent) : QWidget(parent)
     QGridLayout *mainLayout = new QGridLayout(this);
 
     pizza->setRaio(150);
-    pizza->inSec(40.0);
-    pizza->inSec(87.2);
+    pizza->inserirSetor(40.0);
+    pizza->inserirSetor(87.2);
+    pizza->inserirSetor(35.7);
+    pizza->inserirSetor(90.54);
     pizza->setAngulo(32.5);
 
     mainLayout->addWidget(pizza);
