@@ -29,7 +29,7 @@ private:
 
     qreal m_angulo = 0;
     int m_raio = 0;
-    QVector<qreal> m_angulos;
+    QVector<qreal> m_angulos = { 0 };
 };
 
 #endif // PIZZA_H
