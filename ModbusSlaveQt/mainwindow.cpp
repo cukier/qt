@@ -133,7 +133,7 @@ void MainWindow::on_connectType_currentIndexChanged(int index)
         reg.insert(QModbusDataUnit::Coils, { QModbusDataUnit::Coils, 0, 10 });
         reg.insert(QModbusDataUnit::DiscreteInputs, { QModbusDataUnit::DiscreteInputs, 0, 10 });
         reg.insert(QModbusDataUnit::InputRegisters, { QModbusDataUnit::InputRegisters, 0, 10 });
-        reg.insert(QModbusDataUnit::HoldingRegisters, { QModbusDataUnit::HoldingRegisters, 0, 10 });
+        reg.insert(QModbusDataUnit::HoldingRegisters, { QModbusDataUnit::HoldingRegisters, 0, 1024 });
 
         modbusDevice->setMap(reg);
 
