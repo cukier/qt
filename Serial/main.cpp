@@ -30,14 +30,15 @@ int main(int argc, char *argv[])
 
     serialPort.open(QIODevice::WriteOnly);
 
-    QFile dataFile;
-    if (!dataFile.open(stdin, QIODevice::ReadOnly)) {
-        standardOutput << QObject::tr("Failed to open stdin for reading") << endl;
-        return 1;
-    }
+//    QFile dataFile;
+//    if (!dataFile.open(stdin, QIODevice::ReadOnly)) {
+//        standardOutput << QObject::tr("Failed to open stdin for reading") << endl;
+//        return 1;
+//    }
 
-    const QByteArray writeData(dataFile.readAll());
-    dataFile.close();
+//    const QByteArray writeData(dataFile.readAll());
+//    dataFile.close();
+    const QByteArray writeData("hello world");
 
     if (writeData.isEmpty()) {
         standardOutput << QObject::tr("Either no data was currently available on "
