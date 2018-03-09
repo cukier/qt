@@ -1,79 +1,54 @@
-#include <QCoreApplication>
-//#include <QSerialPortInfo>
-#include <QSerialPort>
+#include "serialwriter.h"
 
-#include <QDebug>
+#include <QCoreApplication>
+#include <QFile>
+#include <QSerialPort>
+#include <QStringList>
+#include <QTextStream>
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication a(argc, argv);
+    QCoreApplication coreApplication(argc, argv);
+    const int argumentCount = QCoreApplication::arguments().size();
+    const QStringList argumentList = QCoreApplication::arguments();
 
-//    const auto infos = QSerialPortInfo::availablePorts();
+    QTextStream standardOutput(stdout);
 
-//    for (const QSerialPortInfo &info : infos)
-//    {
-//        QString s = QObject::tr("Port: ") + info.portName() + "\n"
-//                //                + QObject::tr("Location: ") + info.systemLocation() + "\n"
-//                //                + QObject::tr("Description: ") + info.description() + "\n"
-//                //                + QObject::tr("Manufacturer: ") + info.manufacturer() + "\n"
-//                //                + QObject::tr("Serial number: ") + info.serialNumber() + "\n"
-//                //                + QObject::tr("Vendor Identifier: ") + (info.hasVendorIdentifier() ? QString::number(info.vendorIdentifier(), 16) : QString()) + "\n"
-//                //                + QObject::tr("Product Identifier: ") + (info.hasProductIdentifier() ? QString::number(info.productIdentifier(), 16) : QString()) + "\n"
-//                //                + QObject::tr("Busy: ") + (info.isBusy() ? QObject::tr("Yes") : QObject::tr("No")) + "\n"
-//                ;
-
-//        qDebug() << s;
-//    }
+    if (argumentCount == 1) {
+        standardOutput << QObject::tr("Usage: %1 <serialportname> [baudrate]")
+                          .arg(argumentList.first()) << endl;
+        return 1;
+    }
 
     QSerialPort serialPort;
+    const QString serialPortName = argumentList.at(1);
+    serialPort.setPortName(serialPortName);
 
-    //    QString str = "Hello\n";
-    QByteArray writeData("Hello\n");
+    const int serialPortBaudRate = (argumentCount > 2)
+            ? argumentList.at(2).toInt() : QSerialPort::Baud9600;
+    serialPort.setBaudRate(serialPortBaudRate);
 
-    serialPort.setPortName("COM3");
-    serialPort.setBaudRate(QSerialPort::Baud9600);
-    serialPort.setDataBits(QSerialPort::Data8);
-    serialPort.setParity(QSerialPort::NoParity);
-    serialPort.setStopBits(QSerialPort::OneStop);
-    qDebug() << serialPort.open(QIODevice::WriteOnly);
-    qDebug() << serialPort.write(writeData);
-    serialPort.flush();
-    serialPort.close();
-    qDebug() << "Ok";
+    serialPort.open(QIODevice::WriteOnly);
 
-    return a.exec();
-//    return 0;
+    QFile dataFile;
+    if (!dataFile.open(stdin, QIODevice::ReadOnly)) {
+        standardOutput << QObject::tr("Failed to open stdin for reading") << endl;
+        return 1;
+    }
+
+    const QByteArray writeData(dataFile.readAll());
+    dataFile.close();
+
+    if (writeData.isEmpty()) {
+        standardOutput << QObject::tr("Either no data was currently available on "
+                                      "the standard input for reading, "
+                                      "or an error occurred for port %1, error: %2")
+                          .arg(serialPortName).arg(serialPort.errorString()) << endl;
+        return 1;
+    }
+
+    SerialWriter serialPortWriter(&serialPort);
+    serialPortWriter.write(writeData);
+
+    return coreApplication.exec();
 }
-
-//#include <QCoreApplication>
-//#include <QSerialPort>
-
-
-//int main(int argc, char *argv[])
-//{
-//    QCoreApplication coreApplication(argc, argv);
-
-//    QSerialPort serialPort;
-//    serialPort.setPortName("COM3");
-//    serialPort.setBaudRate(QSerialPort::Baud9600);
-
-//    if (!serialPort.open(QIODevice::WriteOnly))
-//    {
-//        return 1;
-//    }
-
-//    QByteArray writeData("Hello");
-
-//    const qint64 bytesWritten = serialPort.write(writeData);
-
-//    if (bytesWritten == -1) {
-//        return 1;
-//    } else if (bytesWritten != writeData.size()) {
-//        return 1;
-//    } else if (!serialPort.waitForBytesWritten(5000)) {
-//        return 1;
-//    }
-
-//    return 0;
-//}
-
