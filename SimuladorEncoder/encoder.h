@@ -15,10 +15,12 @@ public:
 private slots:
     void handleReadyRead();
     void handleError(QSerialPort::SerialPortError error);
+    void response();
 
 private:
     QSerialPort *m_port = nullptr;
-    static const char enc_init[3];
+    QTimer *m_timer;
+    static const char enc_init[3];    
 };
 
 #endif // ENCODER_H
