@@ -4,23 +4,36 @@
 #include <QObject>
 #include <QModbusDataUnit>
 #include <QTimer>
+#include <QModbusDevice>
 
 class QModbusClient;
 
 class MestreModbus : public QObject
 {
     Q_OBJECT
+
+    enum
+    {
+        TamanhoMapa = 250,
+        Step = 40
+    };
 public:
     explicit MestreModbus(QUrl *addr, QObject *parent = nullptr);
     ~MestreModbus();
 
 private slots:
     void onStateChanged(int state);
-//    void connectDev();
-//    void readReady();
+    void onErrorOccurred(QModbusDevice::Error error);
+    void refresh();
+    //    void connectDev();
+    void readReady();
 
 private:
     QModbusClient *modbusDevice;
+    QTimer *timer;
+
+    quint16 offset = 0;
+    QVector<quint16> mapa;
 };
 
 #endif // MESTREMODBUS_H

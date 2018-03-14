@@ -1,6 +1,7 @@
 #include <QCoreApplication>
 #include <QUrl>
-#include <QNetworkProxyQuery>
+#include <QNetworkProxy>
+#include <QSettings>
 
 #include "mestremodbus.h"
 
@@ -10,18 +11,30 @@ int main(int argc, char *argv[])
 
     QUrl url;
     url.setPort(502);
-    url.setHost("192.168.0.110");
-    url.setUserName("USER");
-    url.setPassword("USER");
+    //    url.setHost("192.168.0.110");
+    url.setHost("127.0.0.1");
+    //    url.setUserName("USER");
+    //    url.setPassword("USER");
 
     QNetworkProxyQuery npq(url);
     QList<QNetworkProxy> listOfProxies = QNetworkProxyFactory::systemProxyForQuery(npq);
+    QNetworkProxy proxy;
 
-    if (listOfProxies.count() !=0)
+    if (listOfProxies.size())
     {
-        for(const auto i : listOfProxies)
-            qDebug() << i.hostName();
+        proxy.setHostName(listOfProxies[0].hostName());
+        proxy.setPort(listOfProxies[0].port());
     }
+    else
+    {
+        proxy.setHostName("192.168.0.1");
+        proxy.setPort(3128);
+    }
+
+    proxy.setType(QNetworkProxy::HttpProxy);
+    //    proxy.setUser("username");
+    //    proxy.setPassword("password");
+    QNetworkProxy::setApplicationProxy(proxy);
 
     MestreModbus m(&url);
 
