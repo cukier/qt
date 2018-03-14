@@ -2,15 +2,13 @@
 
 #include <QDebug>
 
-const char Encoder::enc_init[3] = {
-    (char) 0x40, (char) 0x9a, (char) 0xda
-};
-
 Encoder::Encoder(QSerialPort *serialPort, QObject *parent) :
     QObject(parent),
     m_port(serialPort),
     m_timer(new QTimer(this))
 {
+    m_data.clear();
+
     connect(m_port, &QSerialPort::readyRead,
             this, &Encoder::handleReadyRead);
     connect(m_port, &QSerialPort::errorOccurred,
@@ -20,12 +18,20 @@ Encoder::Encoder(QSerialPort *serialPort, QObject *parent) :
 
 void Encoder::handleReadyRead()
 {
-    const QByteArray data = m_port->readAll();
+    m_data = m_port->readAll();
+    //    QString str;
 
-    if (data.contains(enc_init))
+    //    for(const auto i : data)
+    //    {
+    //        str += "0x" + QString::number(i & 0xFF, 16) + ' ';
+    //    }
+
+    //    qDebug() << str;
+
+    if (m_data.contains(EncoderAddress))
     {
-        qDebug() << "Ok";
-        m_timer->start(100);
+        //        qDebug() << "Ok";
+        m_timer->start(10);
     }
 }
 
@@ -40,21 +46,75 @@ void Encoder::response()
     if (m_timer->isActive())
         m_timer->stop();
 
-    QByteArray resp("Resposta encoder");
+    QByteArray resp;
 
-    const qint64 bytesWritten = m_port->write("Resposta encoder");
+    resp.clear();
+    resp.append(EncoderAddress);
 
-    if (bytesWritten == -1)
+    if (m_data.contains(ReadSerialNumber))
     {
-        qDebug() << "Failed to write the data to port";
+        resp.append(ReadSerialNumber);
+        resp.append("SERIAL___");
+        resp.append("FIRMWARE__");
+        resp.append("26.11.10");
+        resp.append(crc(resp));
+        qDebug() << "Read Serial Number";
     }
-    else if (bytesWritten != resp.size())
+    else if(m_data.contains(ReadPosition))
     {
-        qDebug() << "Failed to write all the data to port";
+        resp.append(ReadPosition);
+        resp.append((char) 0);
+        resp.append((char) 0);
+        resp.append(1);
+        resp.append((char) 0);
+        qDebug() << "Read Position";
+    }
+    else if(m_data.contains(ReadEncoderType))
+    {
+        resp.append(ReadEncoderType);
+        resp.append("PART_NUMBER_____");
+        resp.append("ENCTYPE");
+        resp.append("DATACODE");
+        resp.append((char) 0x00);
+        resp.append((char) 0x01);
+        resp.append((char) 0x00);
+        qDebug() << "Read Encoder Type";
+    }
+
+    if(resp.size())
+    {
+        resp.append(crc(resp));
+
+        const qint64 bytesWritten = m_port->write(resp);
+
+        if (bytesWritten == -1)
+        {
+            qDebug() << "Failed to write the data to port";
+        }
+        else if (bytesWritten != resp.size())
+        {
+            qDebug() << "Failed to write all the data to port";
+        }
+        else
+        {
+            m_port->flush();
+            //        qDebug() << "Enviado";
+        }
     }
     else
     {
-        m_port->flush();
-        qDebug() << "Enviado";
+        qDebug() << "Resp vazio";
     }
+
+    m_data.clear();
+}
+
+quint8 Encoder::crc(QByteArray data) const
+{
+    quint8 ret = 0;
+
+    for (const auto i : data)
+        ret ^= i;
+
+    return ret;
 }

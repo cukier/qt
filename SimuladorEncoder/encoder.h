@@ -3,8 +3,7 @@
 
 #include <QObject>
 #include <QSerialPort>
-#include <serialreader.h>
-#include <serialwriter.h>
+#include <QTimer>
 
 class Encoder : public QObject
 {
@@ -20,7 +19,29 @@ private slots:
 private:
     QSerialPort *m_port = nullptr;
     QTimer *m_timer;
-    static const char enc_init[3];    
+    QByteArray m_data;
+
+    quint8 crc(QByteArray data) const;
+
+    enum Sick
+    {
+        EncoderAddress = 0x40
+    };
+
+    enum SickCommands
+    {
+        Reset = 0x53,
+        ReadSerialNumber = 0x56,
+        ReadPosition = 0x92,
+        SetNumberOfLines = 0x96,
+        SetElectricalInterface,
+        SetZeroPulseWidthElectrical,
+        ZeroSet,
+        ReadEncoderType,
+        SetZeroPulseWidthMechanical,
+        ReadZeroPulseWidthElctricalMecahnical,
+        ReadElectricalInterface
+    };
 };
 
 #endif // ENCODER_H
