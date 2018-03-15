@@ -11,8 +11,8 @@ int main(int argc, char *argv[])
 
     QUrl url;
     url.setPort(502);
-    //    url.setHost("192.168.0.110");
-    url.setHost("127.0.0.1");
+    url.setHost("192.168.0.110");
+    //    url.setHost("127.0.0.1");
     //    url.setUserName("USER");
     //    url.setPassword("USER");
 
@@ -24,19 +24,22 @@ int main(int argc, char *argv[])
     {
         proxy.setHostName(listOfProxies[0].hostName());
         proxy.setPort(listOfProxies[0].port());
-    }
-    else
-    {
-        proxy.setHostName("192.168.0.1");
-        proxy.setPort(3128);
+        //        proxy.setUser("username");
+        //        proxy.setPassword("password");
     }
 
-    proxy.setType(QNetworkProxy::HttpProxy);
-    //    proxy.setUser("username");
-    //    proxy.setPassword("password");
-    QNetworkProxy::setApplicationProxy(proxy);
+    if (!proxy.hostName().isEmpty())
+    {
+        qDebug() << "Encontrado proxy "
+                 << proxy.hostName()
+                 << " @ " << proxy.port();
+        proxy.setType(QNetworkProxy::NoProxy);
+        QNetworkProxy::setApplicationProxy(proxy);
+//        QNetworkProxyFactory::setUseSystemConfiguration(true);
+    }
 
     MestreModbus m(&url);
 
     return a.exec();
 }
+

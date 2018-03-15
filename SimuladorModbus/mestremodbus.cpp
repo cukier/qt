@@ -4,6 +4,7 @@
 #include <QUrl>
 #include <QDebug>
 #include <QCoreApplication>
+#include <QProcess>
 
 MestreModbus::MestreModbus(QUrl *addr, QObject *parent) :
     QObject(parent),
@@ -127,6 +128,22 @@ void MestreModbus::readReady()
         }
         else
         {
+            //            QProcess::execute("cls");
+            QString str;
+
+            for (quint16 i = 0; i < mapa.size(); ++i)
+            {
+                if (i && !(i % 10))
+                {
+                    qDebug() << str;
+                    str.clear();
+                }
+
+                str.append("0x" + QString("%1 ").arg(QString::number(mapa.value(i), 16), 5, QChar('0')));
+            }
+
+            qDebug() << str;
+
             offset = 0;
             mapa.clear();
         }
