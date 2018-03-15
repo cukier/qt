@@ -21,6 +21,9 @@ public:
     explicit MestreModbus(QUrl *addr, QObject *parent = nullptr);
     ~MestreModbus();
 
+signals:
+    void mapaChanged(QVector<quint16> data);
+
 private slots:
     void onStateChanged(int state);
     void onErrorOccurred(QModbusDevice::Error error);

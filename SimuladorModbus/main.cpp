@@ -40,6 +40,12 @@ int main(int argc, char *argv[])
 
     MestreModbus m(&url);
 
+    m.setObjectName("Mestre Modbus");
+
+    QObject::connect(&m, &MestreModbus::mapaChanged, [&m](){
+       qDebug() << "O mapa mudou" << m.objectName();
+    });
+
     return a.exec();
 }
 

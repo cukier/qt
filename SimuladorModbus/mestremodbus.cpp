@@ -63,7 +63,7 @@ void MestreModbus::onStateChanged(int state)
     }
     else if (state == QModbusDevice::ConnectedState)
     {
-        timer->start(500);
+        timer->start(150);
         qDebug() << "Conectado";
     }
     else if (state == QModbusClient::ClosingState)
@@ -128,7 +128,7 @@ void MestreModbus::readReady()
         }
         else
         {
-            //            QProcess::execute("cls");
+            QProcess::execute("clear");
             QString str;
 
             for (quint16 i = 0; i < mapa.size(); ++i)
@@ -144,6 +144,7 @@ void MestreModbus::readReady()
 
             qDebug() << str;
 
+            emit mapaChanged(mapa);
             offset = 0;
             mapa.clear();
         }
