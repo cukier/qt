@@ -28,7 +28,6 @@ private slots:
     void onStateChanged(int state);
     void onErrorOccurred(QModbusDevice::Error error);
     void refresh();
-    //    void connectDev();
     void readReady();
 
 private:

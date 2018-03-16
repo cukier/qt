@@ -19,7 +19,7 @@ qint8 A::getId() const
     return this->id;
 }
 
-void A::setId(const qint8 id)
+void A::setId(const qint16 id)
 {
     this->id = id;
 }
@@ -41,9 +41,13 @@ void A::read(const QJsonObject &json)
 {
     if (json.contains("name") && json["name"].isString())
         this->nome = json["name"].toString();
+
+    if (json.contains("id") && json["id"].isString())
+        this->id = json["id"].toInt();
 }
 
 void A::write(QJsonObject &json) const
 {
     json["name"] = this->nome;
+    json["id"] = this->id;
 }

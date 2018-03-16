@@ -33,10 +33,10 @@ int main(int argc, char *argv[])
         qDebug() << "Encontrado proxy "
                  << proxy.hostName()
                  << " @ " << proxy.port();
-        proxy.setType(QNetworkProxy::NoProxy);
-        QNetworkProxy::setApplicationProxy(proxy);
-//        QNetworkProxyFactory::setUseSystemConfiguration(true);
     }
+    proxy.setType(QNetworkProxy::NoProxy);
+    QNetworkProxy::setApplicationProxy(proxy);
+    //        QNetworkProxyFactory::setUseSystemConfiguration(true);
 
     MestreModbus m(&url);
 

@@ -139,7 +139,8 @@ void MestreModbus::readReady()
                     str.clear();
                 }
 
-                str.append("0x" + QString("%1 ").arg(QString::number(mapa.value(i), 16), 5, QChar('0')));
+                str.append("0x" + QString("%1 ").arg(
+                               QString::number(mapa.value(i), 16), 5, QChar('0')));
             }
 
             qDebug() << str;
