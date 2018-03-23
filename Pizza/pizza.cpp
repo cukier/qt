@@ -2,7 +2,6 @@
 
 #include <QPen>
 #include <QPainter>
-#include <QDebug>
 #include <QtCore/QtMath>
 #include <QPaintEvent>
 
@@ -64,23 +63,24 @@ void Pizza::paintEvent(QPaintEvent *event)
 
     if (sum < 360)
     {
-        pen.setColor(Qt::darkGreen);
-        brush.setColor(Qt::darkGreen);
+        pen.setColor(Qt::gray);
+        brush.setColor(Qt::gray);
         painter.setBrush(brush);
         painter.setPen(pen);
         painter.drawPie(rec, sum * 16, (360 - sum) * 16);
     }
 
+    qreal m_anguloAux = m_angulo + 90;
     qreal raioh = height() / 2;
     qreal raiow = width() / 2;
-    qreal co = qSin(qDegreesToRadians(m_angulo)) * raioh;
-    qreal ca = qCos(qDegreesToRadians(m_angulo)) * raiow;
+    qreal co = qSin(qDegreesToRadians(m_anguloAux)) * raioh;
+    qreal ca = qCos(qDegreesToRadians(m_anguloAux)) * raiow;
     qreal pos_x = raiow + ca;
     qreal pos_y = raioh - co;
 
 
-//    qreal pos_y = (qCos(qDegreesToRadians(m_angulo)) * width()) + auxw;
-//    qreal pos_x = (qSin(qDegreesToRadians(m_angulo)) * height()) + auxh;
+    //    qreal pos_y = (qCos(qDegreesToRadians(m_angulo)) * width()) + auxw;
+    //    qreal pos_x = (qSin(qDegreesToRadians(m_angulo)) * height()) + auxh;
     QPointF fim(pos_x, pos_y);
     QPointF centro(raiow, raioh);
 

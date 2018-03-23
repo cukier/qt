@@ -30,5 +30,4 @@ SOURCES += \
 HEADERS += \
         pizza.h
 
-FORMS += \
-        pizza.ui
+FORMS +=
