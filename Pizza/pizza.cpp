@@ -84,6 +84,24 @@ void Pizza::paintEvent(QPaintEvent *event)
     pen.setColor(Qt::red);
     painter.setPen(pen);
     painter.drawLine(centro, fim);
+
+    brush.setStyle(Qt::Dense7Pattern);
+    rec.setWidth(m_size);
+    rec.setHeight(m_size);
+    rec.moveCenter(QPoint(m_centrow, m_centroh));
+    sum = 0;
+
+    for (const auto i : m_angulosCanhao)
+    {
+        pen.setColor((Qt::GlobalColor) cor);
+        brush.setColor((Qt::GlobalColor) cor);
+        painter.setPen(pen);
+        painter.setBrush(brush);
+        painter.drawPie(rec, (sum + angOffset) * -16, i * -16);
+        sum += i;
+        update();
+        ++cor;
+    }
 }
 
 void Pizza::inserirSetor(qreal angulo)

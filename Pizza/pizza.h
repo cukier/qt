@@ -26,7 +26,7 @@ protected:
 
 private:
     enum PixelsSize {
-        PixelOffset = 10,
+        PixelOffset = 20,
         MinimalSize = 150
     };
 
