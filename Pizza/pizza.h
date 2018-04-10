@@ -17,18 +17,22 @@ public:
 
     void setAngulo(qreal angulo);
     void inserirSetor(qreal angulo);
-    void clearSetor();
+    void inserirSetores(QVector<qreal> angulos);
+    void inserirSetorCanhao(qreal angulo);
+    void inserirSetoresCanhao(QVector<qreal> angulos);
 
 protected:
     void paintEvent(QPaintEvent *event) override;
 
 private:
     enum PixelsSize {
-        PixelOffset = 0
+        PixelOffset = 10,
+        MinimalSize = 150
     };
 
     qreal m_angulo = 0;
     QVector<qreal> m_angulos = { 0 };
+    QVector<qreal> m_angulosCanhao = { 0 };
     QTimer *timer;
 };
 

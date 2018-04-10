@@ -4,22 +4,13 @@
 #include <QPainter>
 #include <QtCore/QtMath>
 #include <QPaintEvent>
+#include <QDebug>
 
 Pizza::Pizza(QWidget *parent) :
-    QWidget(parent),
-    timer(new QTimer(this))
+    QWidget(parent)
 {
     m_angulos.clear();
-
-    connect(timer, &QTimer::timeout,
-            this, [this](){
-        m_angulo += 0.5;
-
-        if (m_angulo >= 360)
-            m_angulo = 0;
-    });
-
-    timer->start(50);
+    setMinimumSize(MinimalSize, MinimalSize);
 }
 
 Pizza::~Pizza()
@@ -34,7 +25,6 @@ void Pizza::setAngulo(qreal angulo)
 void Pizza::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event);
-    //    const QRect & rect = event->rect();
 
     QPainter painter(this);
     QPen pen;
@@ -46,8 +36,16 @@ void Pizza::paintEvent(QPaintEvent *event)
 
     painter.setRenderHint(QPainter::Antialiasing, true);
 
+    qreal m_size = width() < height() ? width() : height();
+    qreal m_centroh = height() / 2;
+    qreal m_centrow = width() / 2;
     qreal sum = 0;
-    QRect rec(PixelOffset, PixelOffset, width() - 2 * PixelOffset, height() - 2 * PixelOffset);
+    qreal angOffset = -90;
+    QRect rec;
+
+    rec.setWidth(m_size - 2 * PixelOffset);
+    rec.setHeight(m_size - 2 * PixelOffset);
+    rec.moveCenter(QPoint(m_centrow, m_centroh));
 
     for (const auto i : m_angulos)
     {
@@ -55,7 +53,7 @@ void Pizza::paintEvent(QPaintEvent *event)
         brush.setColor((Qt::GlobalColor) cor);
         painter.setPen(pen);
         painter.setBrush(brush);
-        painter.drawPie(rec, sum * 16, i * 16);
+        painter.drawPie(rec, (sum + angOffset) * -16, i * -16);
         sum += i;
         update();
         ++cor;
@@ -67,22 +65,18 @@ void Pizza::paintEvent(QPaintEvent *event)
         brush.setColor(Qt::gray);
         painter.setBrush(brush);
         painter.setPen(pen);
-        painter.drawPie(rec, sum * 16, (360 - sum) * 16);
+        painter.drawPie(rec, (sum + angOffset) * -16, (360 - sum) * -16);
     }
 
-    qreal m_anguloAux = m_angulo + 90;
-    qreal raioh = height() / 2;
-    qreal raiow = width() / 2;
-    qreal co = qSin(qDegreesToRadians(m_anguloAux)) * raioh;
-    qreal ca = qCos(qDegreesToRadians(m_anguloAux)) * raiow;
-    qreal pos_x = raiow + ca;
-    qreal pos_y = raioh - co;
+    qreal m_anguloAux = m_angulo - angOffset;
+    qreal p_aux = m_centroh < m_centrow ? m_centroh : m_centrow;
+    qreal co = qSin(qDegreesToRadians(m_anguloAux)) * p_aux;
+    qreal ca = qCos(qDegreesToRadians(m_anguloAux)) * p_aux;
+    qreal pos_x = m_centrow - ca;
+    qreal pos_y = m_centroh - co;
 
-
-    //    qreal pos_y = (qCos(qDegreesToRadians(m_angulo)) * width()) + auxw;
-    //    qreal pos_x = (qSin(qDegreesToRadians(m_angulo)) * height()) + auxh;
     QPointF fim(pos_x, pos_y);
-    QPointF centro(raiow, raioh);
+    QPointF centro(m_centrow, m_centroh);
 
     pen.setWidth(3);
     pen.setCapStyle(Qt::RoundCap);
@@ -97,7 +91,23 @@ void Pizza::inserirSetor(qreal angulo)
     m_angulos.push_back(angulo);
 }
 
-void Pizza::clearSetor()
+void Pizza::inserirSetorCanhao(qreal angulo)
+{
+    m_angulosCanhao.push_back(angulo);
+}
+
+void Pizza::inserirSetores(QVector<qreal> angulos)
 {
     m_angulos.clear();
+
+    for (const auto i : angulos)
+        m_angulos.push_back(i);
+}
+
+void Pizza::inserirSetoresCanhao(QVector<qreal> angulos)
+{
+    m_angulosCanhao.clear();
+
+    for(const auto i : angulos)
+        m_angulosCanhao.push_back(i);
 }

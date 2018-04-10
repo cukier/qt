@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
 
     QSerialPort sl1;
 
-    sl1.setPortName("COM1");
+    sl1.setPortName("COM2");
     sl1.setBaudRate(QSerialPort::Baud115200);
     sl1.setDataBits(QSerialPort::Data8);
     sl1.setParity(QSerialPort::EvenParity);
