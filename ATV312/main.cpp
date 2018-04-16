@@ -5,12 +5,11 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
-    Atv312 atv;
+    Atv312 atv(&a);
 
     atv.setEndereco(1);
     atv.conectar("COM2");
     atv.ler(8601);
-//    atv.fechar();
 
     return a.exec();
 }

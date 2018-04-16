@@ -118,6 +118,8 @@ void Atv312::onStateChanged(int state)
 
 void Atv312::readReady()
 {
+    disconnect(this, SLOT(readReady()));
+
     auto reply = qobject_cast<QModbusReply *>(sender());
 
     if (reply->error() == QModbusDevice::NoError)
