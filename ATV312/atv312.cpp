@@ -7,6 +7,7 @@
 
 Atv312::Atv312(QObject *parent) : QObject(parent)
 {
+    atv312 = new Atv312MetaObject(this);
 }
 
 Atv312::~Atv312()
@@ -67,6 +68,12 @@ void Atv312::fechar()
     modbusDevice = nullptr;
 }
 
+void Atv312::ler()
+{
+    enderecoLeitura = ControlWord;
+    ler(ControlWord);
+}
+
 void Atv312::ler(quint16 word)
 {
     ler(word, 1);
@@ -99,7 +106,7 @@ void Atv312::onStateChanged(int state)
 
     if (state == QModbusDevice::UnconnectedState)
     {
-        qDebug() << "<Atv312> Nao conectado";
+        qDebug() << "<Atv312> Conexao fechada";
     }
     else if (state == QModbusDevice::ConnectingState)
     {
@@ -126,29 +133,118 @@ void Atv312::readReady()
     {
         const QModbusDataUnit unit = reply->result();
 
-        qDebug() << "Lido " << unit.valueCount();
-        QString str;
-
-        for (const auto i : unit.values())
-            str += QString::number(i, 10) + ' ';
-
-        qDebug() << str;
+        if (unit.valueCount() == 1)
+        {
+            if (enderecoLeitura == ControlWord)
+            {
+                atv312->setControlWord(unit.value(0));
+                ler(++enderecoLeitura);
+            }
+            else if (enderecoLeitura == SpeedReferenceViaTheBus)
+            {
+                atv312->setSpeedReferenceViaTheBus(unit.value(0));
+                ler(++enderecoLeitura);
+            }
+            else if (enderecoLeitura == StatusWord)
+            {
+                atv312->setStatusWord(unit.value(0));
+                ler(++enderecoLeitura);
+            }
+            else if (enderecoLeitura == OutputSpeed)
+            {
+                atv312->setOutputSpeed(unit.value(0));
+                ler(++enderecoLeitura);
+            }
+            else if (enderecoLeitura == SpeedReference)
+            {
+                atv312->setSpeedReference(unit.value(0));
+                ler(++enderecoLeitura);
+            }
+            else if (enderecoLeitura == FaultCode)
+            {
+                atv312->setFaultCode(unit.value(0));
+                ler(++enderecoLeitura);
+            }
+            else if (enderecoLeitura == MinSpeed)
+            {
+                wordAux = 0;
+                wordAux = unit.value(0);
+                ler(++enderecoLeitura);
+            }
+            else if (enderecoLeitura == MinSpeed1)
+            {
+                quint32 aux = (unit.value(0) << 16) & 0xFFFF0000;
+                aux |= wordAux;
+                atv312->setMinSpeed(aux);
+                ler(++enderecoLeitura);
+            }
+            else if (enderecoLeitura == MaxSpeed)
+            {
+                wordAux = 0;
+                wordAux = unit.value(0);
+                ler(++enderecoLeitura);
+            }
+            else if (enderecoLeitura == MaxSpeed1)
+            {
+                quint32 aux = (unit.value(0) << 16) & 0xFFFF0000;
+                aux |= wordAux;
+                atv312->setMaxSpeed(aux);
+                ler(++enderecoLeitura);
+            }
+            else if (enderecoLeitura == AccelerationSpeedDelta)
+            {
+                wordAux = 0;
+                wordAux = unit.value(0);
+                ler(++enderecoLeitura);
+            }
+            else if (enderecoLeitura == AccelerationSpeedDelta1)
+            {
+                quint32 aux = (unit.value(0) << 16) & 0xFFFF0000;
+                aux |= wordAux;
+                atv312->setAccelerationSpeedDelta(aux);
+                ler(++enderecoLeitura);
+            }
+            else if (enderecoLeitura == AccelerationTimeDelta)
+            {
+                atv312->setAccelerationTimeDelta(unit.value(0));
+                ler(++enderecoLeitura);
+            }
+            else if (enderecoLeitura == DecelerationSpeedDelta)
+            {
+                wordAux = 0;
+                wordAux = unit.value(0);
+                ler(++enderecoLeitura);
+            }
+            else if (enderecoLeitura == DecelerationSpeedDelta1)
+            {
+                quint32 aux = (unit.value(0) << 16) & 0xFFFF0000;
+                aux |= wordAux;
+                atv312->setDecelerationSpeedDelta(aux);
+                ler(++enderecoLeitura);
+            }
+            else if (enderecoLeitura == DecelerationTimeDelta)
+            {
+                atv312->setDecelerationTimeDelta(unit.value(0));
+                enderecoLeitura = 0;
+                qApp->exit();
+            }
+        }
     }
     else if (reply->error() == QModbusDevice::ProtocolError)
     {
-        qDebug() << QString(tr("Read response error: %1 (Mobus exception: 0x%2)").
+        qDebug() << QString(tr("<Atv312> Read response error: %1 (Mobus exception: 0x%2)").
                             arg(reply->errorString()).
                             arg(reply->rawResult().exceptionCode(), -1, 16));
     }
     else
     {
-        qDebug() << QString(tr("Read response error: %1 (code: 0x%2)").
+        qDebug() << QString(tr("<Atv312> Read response error: %1 (code: 0x%2)").
                             arg(reply->errorString()).
                             arg(reply->error(), -1, 16));
     }
 
     reply->deleteLater();
-    qApp->exit();
+    //    qApp->exit();
 }
 
 quint16 Atv312::getEndereco() const

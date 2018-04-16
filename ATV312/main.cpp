@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 
     atv.setEndereco(1);
     atv.conectar("COM2");
-    atv.ler(8601);
+    atv.ler();
 
     return a.exec();
 }

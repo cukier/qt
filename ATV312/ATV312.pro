@@ -16,7 +16,9 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += main.cpp \
-    atv312.cpp
+    atv312.cpp \
+    atv312metaobject.cpp
 
 HEADERS += \
-    atv312.h
+    atv312.h \
+    atv312metaobject.h
