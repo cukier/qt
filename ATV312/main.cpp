@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 
     atv.setEndereco(1);
     atv.conectar("COM2");
-    atv.ler();
+    atv.acinonarSentidoHorario();
 
     return a.exec();
 }
