@@ -7,7 +7,6 @@
 
 Atv312::Atv312(QObject *parent) : QObject(parent)
 {
-    atv312 = new Atv312MetaObject(this);
 }
 
 Atv312::~Atv312()
@@ -79,8 +78,11 @@ void Atv312::acinonarSentidoHorario()
     if (atv312)
     {
         delete atv312;
-        atv312 = new Atv312MetaObject(this);
+        atv312 = nullptr;
     }
+
+    if (!atv312)
+        atv312 = new Atv312MetaObject(this);
 
     comando = LigarSentidoHorario;
     connect(this, &Atv312::leituraTerminada,
