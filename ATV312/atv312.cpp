@@ -302,7 +302,9 @@ void Atv312::onLeituraCompleta()
     {
         quint16 aux = setBit(atv312->getControlWord(), SwitchOn);
         aux = setBit(aux, DirectionCommand);
-        qDebug() << "<Atv312> Enviando requisicao de acinamento no sentido horario";
+        qDebug() << tr("<Atv312> Enviando requisicao de acinamento no sentido horario 0x%1 0x%2")
+                    .arg(atv312->getControlWord(), 4, 16, QLatin1Char('0'))
+                    .arg(aux, 4, 16, QLatin1Char('0'));
         escrever(ControlWord, aux);
     }
 }
