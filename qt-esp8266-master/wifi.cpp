@@ -23,12 +23,12 @@ Wifi::Wifi(QWidget *parent) :
     this->encryption[4] = "WPA2_WPA_PSK";
 
     this->port = new QSerialPort(this);
-    this->port->setPortName("ttyUSB0");
+    this->port->setPortName("COM1");
 
     connect(this->port, SIGNAL(readyRead()), SLOT(readPort()));
     bool status = this->port->open(QIODevice::ReadWrite);
     if (status) {
-        this->port->setBaudRate(QSerialPort::Baud9600, QSerialPort::AllDirections);
+        this->port->setBaudRate(QSerialPort::Baud115200, QSerialPort::AllDirections);
         this->port->setDataBits(QSerialPort::Data8);
         this->port->setStopBits(QSerialPort::OneStop);
         this->port->setFlowControl(QSerialPort::NoFlowControl);
