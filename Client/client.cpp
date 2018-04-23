@@ -49,6 +49,8 @@ void Client::on_btCon_clicked()
             this, &Client::onSocketConnected);
     connect(socket, &QTcpSocket::disconnected,
             this, &Client::onSocketDisconnected);
+    connect(socket, &QTcpSocket::readyRead,
+            this, &Client::onReadReady);
 
     if (ui->leHost->text() == "localhost")
         socket->connectToHost(QHostAddress::LocalHost,
@@ -94,6 +96,13 @@ void Client::onSocketDisconnected()
                          "Conexao fechada");
 }
 
+void Client::onReadReady()
+{
+    QMessageBox::information(this,
+                             "Cliente",
+                             socket->readAll());
+}
+
 void Client::on_btEnv_clicked()
 {
     if (!socket)
@@ -112,7 +121,7 @@ void Client::on_btDes_clicked()
         socket = nullptr;
 
         ui->leArg->setEnabled(false);
-        //        ui->btEnv->setEnabled(false);
+        ui->btEnv->setEnabled(false);
         ui->btCon->setEnabled(true);
         ui->btDes->setEnabled(false);
     }

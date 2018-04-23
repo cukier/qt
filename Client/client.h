@@ -21,6 +21,7 @@ private slots:
     void onError(QAbstractSocket::SocketError socketError);
     void onSocketConnected();
     void onSocketDisconnected();
+    void onReadReady();
 
     void on_btEnv_clicked();
 

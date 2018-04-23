@@ -86,5 +86,5 @@ void Server::onNewConnection()
 
 void Server::onReadReady()
 {
-    qDebug() << socket->readAll();
+    socket->write(socket->readAll());
 }
