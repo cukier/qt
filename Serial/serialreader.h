@@ -14,14 +14,14 @@ public:
 
 private slots:
     void handleReadyRead();
-    void handleTimeout();
+//    void handleTimeout();
     void handleError(QSerialPort::SerialPortError error);
 
 private:
     QSerialPort *m_serialPort = nullptr;
+    QTimer *m_timer;
     QByteArray m_readData;
-    QTextStream m_standardOutput;
-    QTimer m_timer;
+    QTextStream m_standardOutput;    
 };
 
 #endif // SERIALREADER_H
