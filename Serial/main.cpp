@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 
     QSerialPort serialPort;
 
-    serialPort.setPortName("COM3");
+    serialPort.setPortName("COM5");
     serialPort.setBaudRate(QSerialPort::Baud9600);
 
     if (!serialPort.open(QIODevice::ReadOnly))

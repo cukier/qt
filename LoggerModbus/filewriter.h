@@ -9,6 +9,7 @@ class FileWriter : public QObject
     Q_OBJECT
 public:
     explicit FileWriter(QObject *parent = nullptr);
+    FileWriter(QString str, QObject *parent = nullptr);
 
 public slots:
     void salvar(quint16 addr, QVector<quint16> dado);

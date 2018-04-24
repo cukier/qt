@@ -9,6 +9,12 @@ FileWriter::FileWriter(QObject *parent) : QObject(parent)
     file_path = "C:/Users/Mouses/Desktop/arquivo.txt";
 }
 
+FileWriter::FileWriter(QString str, QObject *parent) :
+    QObject(parent),
+    file_path(str)
+{
+}
+
 void FileWriter::salvar(quint16 addr, QVector<quint16> dado)
 {
     QFile file(file_path);

@@ -32,7 +32,6 @@ private:
     QString m_porta;
     uint16_t m_endereco;
     bool conectado;
-
 };
 
 #endif // MODBUSSERVER_H
