@@ -43,7 +43,7 @@ const quint16 ModbusServer::wCRCTable[] = {
 ModbusServer::ModbusServer(QString porta, QObject *parent) :
     QObject(parent),
     m_serialPort(nullptr),
-    mapaMemoria(QVector<quint16>(1024))
+    mapaMemoria(QVector<quint16>(mem_size))
 {
     m_serialPort = new QSerialPort(this);
 
@@ -81,67 +81,90 @@ void ModbusServer::on_readReady()
     quint64 n = m_serialPort->bytesAvailable();
 
     qDebug() << "<ModbusServer> " << n << " bytes diponiveis";
-
-    //    QString str;
-
-    //    for (const auto i : m_serialPort->readAll())
-    //    {
-    //        str += tr("0x%0 ").arg(i & 0xFF, 2, 16, QLatin1Char('0'));
-    //    }
-
-    //    qDebug() << str;
-
     const auto adu = m_serialPort->readAll();
+    quint8 addr = adu.at(0);
 
-    if (adu.size() == 8)
+    if (addr == m_addr)
     {
-        quint8 addr = adu.at(0);
         quint8 cmd = adu.at(1);
-        quint16 sAddr = make16(adu.at(2), adu.at(3));
-        quint16 rSize = make16(adu.at(4), adu.at(5));
-        quint16 crc = make16(adu.at(6), adu.at(7));
-        quint16 dataCrc;
-        QByteArray arr = adu.mid(0, 6);
 
-        qDebug() << "Endereco " << QString::number(addr, 16);
-        qDebug() << "Comando " << QString::number(cmd, 16);
-        qDebug() << "Endereco inicial " << QString::number(sAddr, 16);
-        qDebug() << "Quantidade de registradores " << QString::number(rSize, 16);
-        qDebug() << "Checagem redundante ciclica " << QString::number(crc, 16);
-        dataCrc = swapW(ModRTU_CRC(arr));
-        qDebug() << "MCRC " << QString::number(dataCrc, 16);
-
-        if (cmd == 0x03)
+        if (cmd == ReadHoldingRegisters)
         {
-            if (dataCrc == crc)
+            if (adu.size() == 8)
             {
-                QByteArray resp;
-                quint16 respCrc;
-                quint8 respSize = rSize * 2;
+                quint16 rSize = make16(adu.at(4), adu.at(5));
 
-                resp.append(1);
-                resp.append(3);
-                resp.append(respSize);
+                if (rSize >= 1 && rSize <= 0x7D)
+                {
+                    quint16 sAddr = make16(adu.at(2), adu.at(3));
 
-                for (int i = 0; i < rSize; ++i) {
-                    resp.append(mapaMemoria.at(2 * i));
-                    resp.append(mapaMemoria.at(2 * i + 1));
+                    if (sAddr + rSize < mem_size)
+                    {
+                        quint16 crc = make16(adu.at(6), adu.at(7));
+                        quint16 dataCrc;
+                        QByteArray arr = adu.mid(0, 6);
+
+                        dataCrc = swapW(ModRTU_CRC(arr));
+
+                        if (dataCrc == crc)
+                        {
+                            QByteArray pdu;
+                            quint8 pduSize = rSize * 2;
+
+                            pdu.append(m_addr);
+                            pdu.append(ReadHoldingRegisters);
+                            pdu.append(pduSize);
+
+                            for (int i = sAddr; i < rSize; ++i)
+                            {
+                                pdu.append(mapaMemoria.at(2 * i));
+                                pdu.append(mapaMemoria.at((2 * i) + 1));
+                            }
+
+                            modbusWrite(pdu);
+                        }
+                        else
+                        {
+                            qDebug() << "<ModbusServer> Erro de crc. Ignorando";
+                        }
+                    }
+                    else
+                    {
+                        qDebug() << "<ModbusServer> Quantidade de registradores + endereco inicial maior que tamanho da memoria";
+                        QByteArray errorPdu;
+
+                        errorPdu.append(m_addr);
+                        errorPdu.append(ErrorCode);
+                        errorPdu.append(IndexOutOfBoundsError);
+                        modbusWrite(errorPdu);
+                    }
                 }
+                else
+                {
+                    qDebug() << "<ModbusServer> Quantidade de registradores fora do padrao";
+                    QByteArray errorPdu;
 
-                respCrc = swapW(ModRTU_CRC(resp));
-                resp.append(quint8((respCrc & 0xFF00) >> 8));
-                resp.append(quint8(respCrc));
-                m_serialPort->write(resp, resp.size());
+                    errorPdu.append(m_addr);
+                    errorPdu.append(ErrorCode);
+                    errorPdu.append(QuantityOfRegistersError);
+                    modbusWrite(errorPdu);
+                }
             }
             else
             {
-                qDebug() << "<ModbusServer> Erro de CRC";
+                qDebug() << "<ModbusServer> Adu tamanho errado";
+                QByteArray errorPdu;
+
+                errorPdu.append(m_addr);
+                errorPdu.append(ErrorCode);
+                errorPdu.append(FunctionNotSupported);
+                modbusWrite(errorPdu);
             }
         }
     }
     else
     {
-        qDebug() << "Tamanho adu " << adu.size();
+        qDebug() << "<ModbusServer> Endereco diferente, ignorando";
     }
 }
 
@@ -153,6 +176,11 @@ void ModbusServer::on_bytesWritten(quint64 bytes)
 void ModbusServer::on_errorOccurred(QSerialPort::SerialPortError error)
 {
     qDebug() << "<ModbusServer> Erro " << QString::number(error);
+}
+
+void ModbusServer::setAddr(const quint8 &addr)
+{
+    m_addr = addr;
 }
 
 quint16 ModbusServer::make16(quint8 h_b, quint8 l_b)
@@ -200,5 +228,15 @@ quint16 ModbusServer::ModRTU_CRC(QByteArray buf)
     }
 
     return wCRCWord;
+}
+
+void ModbusServer::modbusWrite(QByteArray buf)
+{
+    quint16 respCrc = swapW(ModRTU_CRC(buf));
+
+    buf.append(quint8((respCrc & 0xFF00) >> 8));
+    buf.append(quint8(respCrc));
+
+    m_serialPort->write(buf, buf.size());
 }
 
