@@ -108,6 +108,9 @@ void ModbusServer::on_readReady()
 
                         if (dataCrc == crc)
                         {
+                            qDebug() << "<ModbusServer> Requisicao de leitura (0x03) do endereco"
+                                     << sAddr << " por " << rSize << " registradores";
+
                             QByteArray pdu;
 
                             pdu.append(m_addr);
@@ -165,6 +168,9 @@ void ModbusServer::on_readReady()
 
                         if (dataCrc == crc)
                         {
+                            qDebug() << "<ModbusServer> Requisicao de escrita (0x06) no endereco"
+                                     << sAddr << " por " << rValue << " registradores";
+
                             mapaMemoria[sAddr + 1] = quint8(rValue);
                             mapaMemoria[sAddr] = quint8(rValue >> 8);
 
