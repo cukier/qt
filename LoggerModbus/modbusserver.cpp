@@ -1,163 +1,204 @@
 #include "modbusserver.h"
 
-#include <QSerialPort>
-#include <QModbusRtuSerialSlave>
 #include <QDebug>
-#include <QModbusDataUnitMap>
+#include <QCoreApplication>
+
+//#define make16(x,y)     ((((quint16)x<<8)&0xFF00)|y)
+//#define make16(x,y)     ((quint16(x)<<8)|y)
+
+const quint16 ModbusServer::wCRCTable[] = {
+    0X0000, 0XC0C1, 0XC181, 0X0140, 0XC301, 0X03C0, 0X0280, 0XC241,
+    0XC601, 0X06C0, 0X0780, 0XC741, 0X0500, 0XC5C1, 0XC481, 0X0440,
+    0XCC01, 0X0CC0, 0X0D80, 0XCD41, 0X0F00, 0XCFC1, 0XCE81, 0X0E40,
+    0X0A00, 0XCAC1, 0XCB81, 0X0B40, 0XC901, 0X09C0, 0X0880, 0XC841,
+    0XD801, 0X18C0, 0X1980, 0XD941, 0X1B00, 0XDBC1, 0XDA81, 0X1A40,
+    0X1E00, 0XDEC1, 0XDF81, 0X1F40, 0XDD01, 0X1DC0, 0X1C80, 0XDC41,
+    0X1400, 0XD4C1, 0XD581, 0X1540, 0XD701, 0X17C0, 0X1680, 0XD641,
+    0XD201, 0X12C0, 0X1380, 0XD341, 0X1100, 0XD1C1, 0XD081, 0X1040,
+    0XF001, 0X30C0, 0X3180, 0XF141, 0X3300, 0XF3C1, 0XF281, 0X3240,
+    0X3600, 0XF6C1, 0XF781, 0X3740, 0XF501, 0X35C0, 0X3480, 0XF441,
+    0X3C00, 0XFCC1, 0XFD81, 0X3D40, 0XFF01, 0X3FC0, 0X3E80, 0XFE41,
+    0XFA01, 0X3AC0, 0X3B80, 0XFB41, 0X3900, 0XF9C1, 0XF881, 0X3840,
+    0X2800, 0XE8C1, 0XE981, 0X2940, 0XEB01, 0X2BC0, 0X2A80, 0XEA41,
+    0XEE01, 0X2EC0, 0X2F80, 0XEF41, 0X2D00, 0XEDC1, 0XEC81, 0X2C40,
+    0XE401, 0X24C0, 0X2580, 0XE541, 0X2700, 0XE7C1, 0XE681, 0X2640,
+    0X2200, 0XE2C1, 0XE381, 0X2340, 0XE101, 0X21C0, 0X2080, 0XE041,
+    0XA001, 0X60C0, 0X6180, 0XA141, 0X6300, 0XA3C1, 0XA281, 0X6240,
+    0X6600, 0XA6C1, 0XA781, 0X6740, 0XA501, 0X65C0, 0X6480, 0XA441,
+    0X6C00, 0XACC1, 0XAD81, 0X6D40, 0XAF01, 0X6FC0, 0X6E80, 0XAE41,
+    0XAA01, 0X6AC0, 0X6B80, 0XAB41, 0X6900, 0XA9C1, 0XA881, 0X6840,
+    0X7800, 0XB8C1, 0XB981, 0X7940, 0XBB01, 0X7BC0, 0X7A80, 0XBA41,
+    0XBE01, 0X7EC0, 0X7F80, 0XBF41, 0X7D00, 0XBDC1, 0XBC81, 0X7C40,
+    0XB401, 0X74C0, 0X7580, 0XB541, 0X7700, 0XB7C1, 0XB681, 0X7640,
+    0X7200, 0XB2C1, 0XB381, 0X7340, 0XB101, 0X71C0, 0X7080, 0XB041,
+    0X5000, 0X90C1, 0X9181, 0X5140, 0X9301, 0X53C0, 0X5280, 0X9241,
+    0X9601, 0X56C0, 0X5780, 0X9741, 0X5500, 0X95C1, 0X9481, 0X5440,
+    0X9C01, 0X5CC0, 0X5D80, 0X9D41, 0X5F00, 0X9FC1, 0X9E81, 0X5E40,
+    0X5A00, 0X9AC1, 0X9B81, 0X5B40, 0X9901, 0X59C0, 0X5880, 0X9841,
+    0X8801, 0X48C0, 0X4980, 0X8941, 0X4B00, 0X8BC1, 0X8A81, 0X4A40,
+    0X4E00, 0X8EC1, 0X8F81, 0X4F40, 0X8D01, 0X4DC0, 0X4C80, 0X8C41,
+    0X4400, 0X84C1, 0X8581, 0X4540, 0X8701, 0X47C0, 0X4680, 0X8641,
+    0X8201, 0X42C0, 0X4380, 0X8341, 0X4100, 0X81C1, 0X8081, 0X4040 };
 
 ModbusServer::ModbusServer(QString porta, QObject *parent) :
     QObject(parent),
-    m_device(nullptr),
-    m_porta(porta),
-    m_endereco(1),
-    conectado(false)
+    m_serialPort(nullptr),
+    mapaMemoria(QVector<quint16>(1024))
 {
+    m_serialPort = new QSerialPort(this);
 
+    if (!m_serialPort)
+    {
+        qDebug() << "<ModbusServer> Erro ao criar porta serial";
+        qApp->exit(EXIT_FAILURE);
+    }
+
+    if (porta.isEmpty() || porta.isNull())
+        porta = "COM1";
+
+    m_serialPort->setPortName(porta);
+    m_serialPort->setBaudRate(QSerialPort::Baud19200);
+    m_serialPort->setDataBits(QSerialPort::Data8);
+    m_serialPort->setParity(QSerialPort::NoParity);
+    m_serialPort->setStopBits(QSerialPort::OneStop);
+
+    connect(m_serialPort, &QSerialPort::readyRead,
+            this, &ModbusServer::on_readReady);
+    connect(m_serialPort, &QSerialPort::bytesWritten,
+            this, &ModbusServer::on_bytesWritten);
+    connect(m_serialPort, &QSerialPort::errorOccurred,
+            this, &ModbusServer::on_errorOccurred);
+
+    m_serialPort->open(QIODevice::ReadWrite);
 }
 
 ModbusServer::~ModbusServer()
 {
-    if (m_device)
-        m_device->disconnectDevice();
 }
 
-QString ModbusServer::porta() const
+void ModbusServer::on_readReady()
 {
-    return m_porta;
-}
+    quint64 n = m_serialPort->bytesAvailable();
 
-void ModbusServer::setPorta(const QString &porta)
-{
-    m_porta = porta;
-}
+    qDebug() << "<ModbusServer> " << n << " bytes diponiveis";
 
-uint16_t ModbusServer::endereco() const
-{
-    return m_endereco;
-}
+    //    QString str;
 
-void ModbusServer::setEndereco(const uint16_t &endereco)
-{
-    m_endereco = endereco;
-}
+    //    for (const auto i : m_serialPort->readAll())
+    //    {
+    //        str += tr("0x%0 ").arg(i & 0xFF, 2, 16, QLatin1Char('0'));
+    //    }
 
-void ModbusServer::on_error(QModbusDevice::Error newError)
-{
-    qDebug() << "<ModbusServer> Erro ocorrido " << newError
-             << ' ' << m_device->errorString();
-}
+    //    qDebug() << str;
 
-void ModbusServer::on_stateChanged(QModbusDevice::State newState)
-{
-    conectado = false;
+    const auto adu = m_serialPort->readAll();
 
-    if (newState == QModbusDevice::ConnectedState)
+    if (adu.size() == 8)
     {
-        conectado = true;
-        qDebug() << "<ModbusServer> conectado";
-    }
-    else if (newState == QModbusDevice::ConnectingState)
-    {
-        qDebug() << "<ModbusServer> conectando a porta "
-                 << m_porta;
-    }
-    else if (newState == QModbusDevice::ClosingState)
-    {
-        qDebug() << "<ModbusServer> fechando";
-    }
-    else if (newState == QModbusDevice::UnconnectedState)
-    {
-        qDebug() << "<ModbusServer> desconectado";
-    }
-}
+        quint8 addr = adu.at(0);
+        quint8 cmd = adu.at(1);
+        quint16 sAddr = make16(adu.at(2), adu.at(3));
+        quint16 rSize = make16(adu.at(4), adu.at(5));
+        quint16 crc = make16(adu.at(6), adu.at(7));
+        quint16 dataCrc;
+        QByteArray arr = adu.mid(0, 6);
 
-void ModbusServer::on_dataWritten(QModbusDataUnit::RegisterType i_register,
-                                  int address, int size)
-{
-    QVector<quint16> dado;
+        qDebug() << "Endereco " << QString::number(addr, 16);
+        qDebug() << "Comando " << QString::number(cmd, 16);
+        qDebug() << "Endereco inicial " << QString::number(sAddr, 16);
+        qDebug() << "Quantidade de registradores " << QString::number(rSize, 16);
+        qDebug() << "Checagem redundante ciclica " << QString::number(crc, 16);
+        dataCrc = swapW(ModRTU_CRC(arr));
+        qDebug() << "MCRC " << QString::number(dataCrc, 16);
 
-    qDebug() << "<ModbusServer> Solicitacao de escrita de " << size
-             << " word no endereco " << address;
-
-    for (int i = 0; i < size; ++i)
-    {
-        quint16 value;
-
-        switch (i_register)
+        if (cmd == 0x03)
         {
-        case QModbusDataUnit::Coils:
-            break;
-        case QModbusDataUnit::HoldingRegisters:
-            m_device->data(QModbusDataUnit::HoldingRegisters, address + i, &value);
-            dado.append(value);
-            qDebug() << "<ModbusServer> " << value;
-            m_device->blockSignals(true);
-            m_device->setData(QModbusDataUnit::HoldingRegisters, address + i, 0xFFFF);
-            m_device->blockSignals(false);
-            break;
-        default:
-            break;
+            if (dataCrc == crc)
+            {
+                QByteArray resp;
+                quint16 respCrc;
+                quint8 respSize = rSize * 2;
+
+                resp.append(1);
+                resp.append(3);
+                resp.append(respSize);
+
+                for (int i = 0; i < rSize; ++i) {
+                    resp.append(mapaMemoria.at(2 * i));
+                    resp.append(mapaMemoria.at(2 * i + 1));
+                }
+
+                respCrc = swapW(ModRTU_CRC(resp));
+                resp.append(quint8((respCrc & 0xFF00) >> 8));
+                resp.append(quint8(respCrc));
+                m_serialPort->write(resp, resp.size());
+            }
+            else
+            {
+                qDebug() << "<ModbusServer> Erro de CRC";
+            }
         }
     }
-
-    if (dado.size())
-        emit novaEscrita(address, dado);
+    else
+    {
+        qDebug() << "Tamanho adu " << adu.size();
+    }
 }
 
-bool ModbusServer::conectar()
+void ModbusServer::on_bytesWritten(quint64 bytes)
 {
-    if (conectado || m_device)
-    {
-        conectado = false;
-
-        if (m_device)
-        {
-            m_device->disconnectDevice();
-            delete m_device;
-            m_device = nullptr;
-        }
-    }
-
-    m_device = new QModbusRtuSerialSlave(this);
-
-    if (!m_device)
-    {
-        qDebug() << "<ModbusServer> erro ao criar servidor modbus";
-    }
-
-    m_device->setConnectionParameter(
-                QModbusDevice::SerialPortNameParameter, m_porta);
-    m_device->setConnectionParameter(
-                QModbusDevice::SerialBaudRateParameter,
-                QSerialPort::Baud19200);
-    m_device->setConnectionParameter(
-                QModbusDevice::SerialDataBitsParameter,
-                QSerialPort::Data8);
-    m_device->setConnectionParameter(
-                QModbusDevice::SerialParityParameter,
-                QSerialPort::NoParity);
-    m_device->setConnectionParameter(
-                QModbusDevice::SerialStopBitsParameter,
-                QSerialPort::OneStop);
-    m_device->setServerAddress(m_endereco);
-
-    QModbusDataUnitMap reg;
-    reg.insert(QModbusDataUnit::DiscreteInputs,
-    { QModbusDataUnit::DiscreteInputs, 0, 10 });
-    reg.insert(QModbusDataUnit::InputRegisters,
-    { QModbusDataUnit::InputRegisters, 0, 10 });
-    reg.insert(QModbusDataUnit::HoldingRegisters,
-    { QModbusDataUnit::HoldingRegisters, 0, 1024 });
-
-    m_device->setMap(reg);
-
-
-    connect(m_device, &QModbusServer::stateChanged,
-            this, &ModbusServer::on_stateChanged);
-    connect(m_device, &QModbusServer::errorOccurred,
-            this, &ModbusServer::on_error);
-    connect(m_device, &QModbusServer::dataWritten,
-            this, &ModbusServer::on_dataWritten);
-
-    return m_device->connectDevice();
+    qDebug() << "<ModbusServer> " << bytes << " bytes para escrever";
 }
+
+void ModbusServer::on_errorOccurred(QSerialPort::SerialPortError error)
+{
+    qDebug() << "<ModbusServer> Erro " << QString::number(error);
+}
+
+quint16 ModbusServer::make16(quint8 h_b, quint8 l_b)
+{
+    quint16 ret = 0;
+
+    ret = h_b << 8 & 0xFF00;
+    ret |= l_b;
+
+    return ret;
+}
+
+quint16 ModbusServer::swapW(quint16 i_w)
+{
+    quint8 l = quint8(i_w);
+    quint8 h = quint8((i_w & 0xFF00) >> 8);
+
+    return make16(l, h);
+}
+
+quint16 ModbusServer::ModRTU_CRC(quint8 *buf, quint16 len)
+{
+    quint8 nTemp;
+    quint16 wCRCWord = 0xFFFF;
+
+    while (len--) {
+        nTemp = *buf++ ^ wCRCWord;
+        wCRCWord >>= 8;
+        wCRCWord ^= wCRCTable[nTemp];
+    }
+
+    return wCRCWord;
+}
+
+quint16 ModbusServer::ModRTU_CRC(QByteArray buf)
+{
+    quint8 nTemp;
+    quint16 wCRCWord = 0xFFFF;
+
+    for (const auto i : buf)
+    {
+        nTemp = quint8(i) ^ wCRCWord;
+        wCRCWord >>= quint16(8);
+        wCRCWord ^= wCRCTable[nTemp];
+    }
+
+    return wCRCWord;
+}
+
