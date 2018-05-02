@@ -109,11 +109,10 @@ void ModbusServer::on_readReady()
                         if (dataCrc == crc)
                         {
                             QByteArray pdu;
-                            quint8 pduSize = rSize * 2;
 
                             pdu.append(m_addr);
                             pdu.append(ReadHoldingRegisters);
-                            pdu.append(pduSize);
+                            pdu.append(rSize * 2);
 
                             for (int i = sAddr; i < rSize; ++i)
                             {
@@ -131,34 +130,67 @@ void ModbusServer::on_readReady()
                     else
                     {
                         qDebug() << "<ModbusServer> Quantidade de registradores + endereco inicial maior que tamanho da memoria";
-                        QByteArray errorPdu;
-
-                        errorPdu.append(m_addr);
-                        errorPdu.append(ErrorCode);
-                        errorPdu.append(IndexOutOfBoundsError);
-                        modbusWrite(errorPdu);
+                        returnModbusError(ReadHoldingRegisters, IndexOutOfBoundsError);
                     }
                 }
                 else
                 {
                     qDebug() << "<ModbusServer> Quantidade de registradores fora do padrao";
-                    QByteArray errorPdu;
-
-                    errorPdu.append(m_addr);
-                    errorPdu.append(ErrorCode);
-                    errorPdu.append(QuantityOfRegistersError);
-                    modbusWrite(errorPdu);
+                    returnModbusError(ReadHoldingRegisters, QuantityOfRegistersError);
                 }
             }
             else
             {
                 qDebug() << "<ModbusServer> Adu tamanho errado";
-                QByteArray errorPdu;
+                returnModbusError(ReadHoldingRegisters, FunctionNotSupported);
+            }
+        }
+        else if (cmd == WriteSingelRegister)
+        {
+            if (adu.size() == 8)
+            {
+                quint16 rValue = make16(adu.at(4), adu.at(5));
 
-                errorPdu.append(m_addr);
-                errorPdu.append(ErrorCode);
-                errorPdu.append(FunctionNotSupported);
-                modbusWrite(errorPdu);
+                if (rValue <= 0xFFFE)
+                {
+                    quint16 sAddr = make16(adu.at(2), adu.at(3));
+
+                    if (sAddr < mem_size)
+                    {
+                        quint16 crc = make16(adu.at(6), adu.at(7));
+                        quint16 dataCrc;
+                        QByteArray arr = adu.mid(0, 6);
+
+                        dataCrc = swapW(ModRTU_CRC(arr));
+
+                        if (dataCrc == crc)
+                        {
+                            mapaMemoria[sAddr + 1] = quint8(rValue);
+                            mapaMemoria[sAddr] = quint8(rValue >> 8);
+
+                            modbusWrite(adu.mid(0, 6));
+                        }
+                        else
+                        {
+                            qDebug() << "<ModbusServer> Erro de crc. Ignorando";
+                        }
+                    }
+                    else
+                    {
+                        qDebug() << "<ModbusServer> Quantidade de registradores + endereco inicial maior que tamanho da memoria";
+                        returnModbusError(WriteSingelRegister, IndexOutOfBoundsError);
+                    }
+                }
+                else
+                {
+                    qDebug() << "<ModbusServer> Quantidade de registradores fora do padrao";
+                    returnModbusError(WriteSingelRegister, QuantityOfRegistersError);
+                }
+            }
+            else
+            {
+                qDebug() << "<ModbusServer> Adu tamanho errado";
+                returnModbusError(WriteSingelRegister, FunctionNotSupported);
             }
         }
     }
@@ -238,5 +270,15 @@ void ModbusServer::modbusWrite(QByteArray buf)
     buf.append(quint8(respCrc));
 
     m_serialPort->write(buf, buf.size());
+}
+
+void ModbusServer::returnModbusError(quint8 eCommand, quint8 eCode)
+{
+    QByteArray errorPdu;
+
+    errorPdu.append(m_addr);
+    errorPdu.append(eCommand | 0x80);
+    errorPdu.append(eCode);
+    modbusWrite(errorPdu);
 }
 

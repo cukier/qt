@@ -34,8 +34,7 @@ public:
         FunctionNotSupported,
         IndexOutOfBoundsError,
         QuantityOfRegistersError,
-        ReadError,
-        ErrorCode = 0x83
+        ReadError
     };
 
     explicit ModbusServer(QString porta, QObject *parent = nullptr);
@@ -60,6 +59,7 @@ private:
     quint16 ModRTU_CRC(quint8 *buf, quint16 len);
     quint16 ModRTU_CRC(QByteArray buf);
     void modbusWrite(QByteArray buf);
+    void returnModbusError(quint8 eCommand, quint8 eCode);
 };
 
 #endif // MODBUSSERVER_H
