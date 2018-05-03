@@ -208,29 +208,39 @@ void ModbusServer::on_readReady()
 
                 if (sAddr + rSize < mem_size)
                 {
-                    quint16 crc = make16(adu.at(n - 2), adu.at(n - 1));
-                    quint16 dataCrc;
-                    QByteArray arr = adu.mid(0, n - 2);
+                    quint8 rQtd = adu.at(6);
 
-                    dataCrc = swapW(ModRTU_CRC(arr));
-
-                    if (dataCrc == crc)
+                    if (quint8(n) == 9 + rQtd)
                     {
-                        qDebug() << "<ModbusServer> Requisicao de escrita (0x10) do endereco"
-                                 << sAddr << " por " << rSize << " registradores";
+                        quint16 crc = make16(adu.at(n - 2), adu.at(n - 1));
+                        quint16 dataCrc;
+                        QByteArray arr = adu.mid(0, n - 2);
 
-                        for (int i = 0; i < rSize; ++i)
+                        dataCrc = swapW(ModRTU_CRC(arr));
+
+                        if (dataCrc == crc)
                         {
-                            mapaMemoria[i + sAddr] = make16(adu.at(7 + (2 * i)), adu.at(7 + ((2 * i) + 1)));
-                        }
+                            qDebug() << "<ModbusServer> Requisicao de escrita (0x10) do endereco"
+                                     << sAddr << " por " << rSize << " registradores";
 
-                        QByteArray pdu = adu.mid(0, 6);
-                        modbusWrite(pdu);
-                        emit novaEscrita(sAddr, mapaMemoria.mid(sAddr, rSize));
+                            for (int i = 0; i < rSize; ++i)
+                            {
+                                mapaMemoria[i + sAddr] = make16(adu.at(7 + (2 * i)), adu.at(7 + ((2 * i) + 1)));
+                            }
+
+                            QByteArray pdu = adu.mid(0, 6);
+                            modbusWrite(pdu);
+                            emit novaEscrita(sAddr, mapaMemoria.mid(sAddr, rSize));
+                        }
+                        else
+                        {
+                            qDebug() << "<ModbusServer> Erro de crc. Ignorando";
+                        }
                     }
                     else
                     {
-                        qDebug() << "<ModbusServer> Erro de crc. Ignorando";
+                        qDebug() << "<ModbusServer> Quantidade de bytes fora do padrao";
+                        returnModbusError(WriteMultipleRegisters, FunctionNotSupported);
                     }
                 }
                 else
