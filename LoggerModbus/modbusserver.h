@@ -18,7 +18,7 @@ public:
         ReadHoldingRegisters,
         ReadInputRegisters,
         WriteSingleCoil,
-        WriteSingelRegister,
+        WriteSingleRegister,
         ReadExecptionStatus,
         Diagnostics,
         GetCommEventCounter = 0x0B,
@@ -54,6 +54,7 @@ private:
     quint8 m_addr = 1;
     static const quint16 mem_size = 1024;
 
+    quint8 make8(quint32 dword, quint8 index);
     quint16 make16(quint8 h_b, quint8 l_b);
     quint16 swapW(quint16 i_w);
     quint16 ModRTU_CRC(quint8 *buf, quint16 len);

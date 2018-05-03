@@ -117,10 +117,10 @@ void ModbusServer::on_readReady()
                             pdu.append(ReadHoldingRegisters);
                             pdu.append(rSize * 2);
 
-                            for (int i = sAddr; i < rSize; ++i)
+                            for (int i = 0; i < rSize; ++i)
                             {
-                                pdu.append(mapaMemoria.at(2 * i));
-                                pdu.append(mapaMemoria.at((2 * i) + 1));
+                                pdu.append(make8(mapaMemoria.at(i + sAddr), 1));
+                                pdu.append(make8(mapaMemoria.at(i + sAddr), 0));
                             }
 
                             modbusWrite(pdu);
@@ -148,7 +148,7 @@ void ModbusServer::on_readReady()
                 returnModbusError(ReadHoldingRegisters, FunctionNotSupported);
             }
         }
-        else if (cmd == WriteSingelRegister)
+        else if (cmd == WriteSingleRegister)
         {
             if (adu.size() == 8)
             {
@@ -171,8 +171,7 @@ void ModbusServer::on_readReady()
                             qDebug() << "<ModbusServer> Requisicao de escrita (0x06) no endereco"
                                      << sAddr << " por " << rValue << " registradores";
 
-                            mapaMemoria[sAddr + 1] = quint8(rValue);
-                            mapaMemoria[sAddr] = quint8(rValue >> 8);
+                            mapaMemoria[sAddr] = rValue;
 
                             modbusWrite(adu.mid(0, 6));
                         }
@@ -184,19 +183,65 @@ void ModbusServer::on_readReady()
                     else
                     {
                         qDebug() << "<ModbusServer> Quantidade de registradores + endereco inicial maior que tamanho da memoria";
-                        returnModbusError(WriteSingelRegister, IndexOutOfBoundsError);
+                        returnModbusError(WriteSingleRegister, IndexOutOfBoundsError);
                     }
                 }
                 else
                 {
                     qDebug() << "<ModbusServer> Quantidade de registradores fora do padrao";
-                    returnModbusError(WriteSingelRegister, QuantityOfRegistersError);
+                    returnModbusError(WriteSingleRegister, QuantityOfRegistersError);
                 }
             }
             else
             {
                 qDebug() << "<ModbusServer> Adu tamanho errado";
-                returnModbusError(WriteSingelRegister, FunctionNotSupported);
+                returnModbusError(WriteSingleRegister, FunctionNotSupported);
+            }
+        }
+        else if (cmd == WriteMultipleRegisters)
+        {
+            quint16 rSize = make16(adu.at(4), adu.at(5));
+
+            if (rSize >= 1 && rSize <= 0x7B)
+            {
+                quint16 sAddr = make16(adu.at(2), adu.at(3));
+
+                if (sAddr + rSize < mem_size)
+                {
+                    quint16 crc = make16(adu.at(n - 2), adu.at(n - 1));
+                    quint16 dataCrc;
+                    QByteArray arr = adu.mid(0, n - 2);
+
+                    dataCrc = swapW(ModRTU_CRC(arr));
+
+                    if (dataCrc == crc)
+                    {
+                        qDebug() << "<ModbusServer> Requisicao de escrita (0x10) do endereco"
+                                 << sAddr << " por " << rSize << " registradores";
+
+                        for (int i = 0; i < rSize; ++i)
+                        {
+                            mapaMemoria[i + sAddr] = make16(adu.at(7 + (2 * i)), adu.at(7 + ((2 * i) + 1)));
+                        }
+
+                        QByteArray pdu = adu.mid(0, 6);
+                        modbusWrite(pdu);
+                    }
+                    else
+                    {
+                        qDebug() << "<ModbusServer> Erro de crc. Ignorando";
+                    }
+                }
+                else
+                {
+                    qDebug() << "<ModbusServer> Quantidade de registradores + endereco inicial maior que tamanho da memoria";
+                    returnModbusError(WriteMultipleRegisters, IndexOutOfBoundsError);
+                }
+            }
+            else
+            {
+                qDebug() << "<ModbusServer> Quantidade de registradores fora do padrao";
+                returnModbusError(WriteMultipleRegisters, QuantityOfRegistersError);
             }
         }
     }
@@ -214,6 +259,11 @@ void ModbusServer::on_bytesWritten(quint64 bytes)
 void ModbusServer::on_errorOccurred(QSerialPort::SerialPortError error)
 {
     qDebug() << "<ModbusServer> Erro " << QString::number(error);
+}
+
+quint8 ModbusServer::make8(quint32 dword, quint8 index)
+{
+    return quint8(dword >> (8 * index));
 }
 
 void ModbusServer::setAddr(const quint8 &addr)
