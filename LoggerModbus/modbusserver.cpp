@@ -172,8 +172,8 @@ void ModbusServer::on_readReady()
                                      << sAddr << " por " << rValue << " registradores";
 
                             mapaMemoria[sAddr] = rValue;
-
                             modbusWrite(adu.mid(0, 6));
+                            emit novaEscrita(sAddr, mapaMemoria.mid(sAddr, 1));
                         }
                         else
                         {
@@ -226,6 +226,7 @@ void ModbusServer::on_readReady()
 
                         QByteArray pdu = adu.mid(0, 6);
                         modbusWrite(pdu);
+                        emit novaEscrita(sAddr, mapaMemoria.mid(sAddr, rSize));
                     }
                     else
                     {

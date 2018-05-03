@@ -42,6 +42,9 @@ public:
 
     void setAddr(const quint8 &addr);
 
+signals:
+    void novaEscrita(quint16 addr, QVector<quint16> dado);
+
 private slots:
     void on_readReady();
     void on_bytesWritten(quint64 bytes);
