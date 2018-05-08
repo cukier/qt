@@ -68,8 +68,6 @@ ModbusServer::ModbusServer(QString porta, QObject *parent) :
             this, &ModbusServer::on_bytesWritten);
     connect(m_serialPort, &QSerialPort::errorOccurred,
             this, &ModbusServer::on_errorOccurred);
-
-    m_serialPort->open(QIODevice::ReadWrite);
 }
 
 ModbusServer::~ModbusServer()
@@ -255,6 +253,12 @@ void ModbusServer::on_readReady()
                 returnModbusError(WriteMultipleRegisters, QuantityOfRegistersError);
             }
         }
+        else
+        {
+            //            qDebug() << "<ModbusServer> Comando nao suportado 0x" << QString::number(cmd, 16);
+            qDebug() << tr("<ModbusServer> Comando nao suportado 0x%0").arg(ushort(cmd), 2, 16, QLatin1Char('0'));
+            returnModbusError(cmd, FunctionNotSupported);
+        }
     }
     else
     {
@@ -277,9 +281,25 @@ quint8 ModbusServer::make8(quint32 dword, quint8 index)
     return quint8(dword >> (8 * index));
 }
 
-void ModbusServer::setAddr(const quint8 &addr)
+void ModbusServer::setEndereco(const quint8 &addr)
 {
     m_addr = addr;
+}
+
+bool ModbusServer::conectar()
+{
+    if (m_serialPort)
+        return m_serialPort->open(QIODevice::ReadWrite);
+    else
+        return false;
+}
+
+QString ModbusServer::getPortName()
+{
+    if (m_serialPort)
+        return m_serialPort->portName();
+    else
+        return "Nenhuma porta";
 }
 
 quint16 ModbusServer::make16(quint8 h_b, quint8 l_b)

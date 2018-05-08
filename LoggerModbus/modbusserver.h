@@ -40,7 +40,9 @@ public:
     explicit ModbusServer(QString porta, QObject *parent = nullptr);
     ~ModbusServer();
 
-    void setAddr(const quint8 &addr);
+    void setEndereco(const quint8 &addr);
+    bool conectar();
+    QString getPortName();
 
 signals:
     void novaEscrita(quint16 addr, QVector<quint16> dado);

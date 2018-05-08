@@ -1,5 +1,5 @@
 QT -= gui
-QT += serialbus serialport
+QT += serialport serialbus
 
 CONFIG += c++11 console
 CONFIG -= app_bundle
@@ -17,8 +17,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += main.cpp \
     modbusserver.cpp \
-    filewriter.cpp
+    filewriter.cpp \
+    modbustcpmaster.cpp
 
 HEADERS += \
     modbusserver.h \
-    filewriter.h
+    filewriter.h \
+    modbustcpmaster.h

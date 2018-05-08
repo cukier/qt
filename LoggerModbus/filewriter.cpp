@@ -3,10 +3,12 @@
 #include <QDate>
 #include <QTime>
 #include <QDebug>
+#include <QDir>
 
 FileWriter::FileWriter(QObject *parent) : QObject(parent)
 {
-    file_path = "C:/Users/Mouses/Desktop/arquivo.txt";
+//    file_path = "C:/Users/Mouses/Desktop/arquivo.txt";
+    file_path = QDir::currentPath() + "logModbus.txt";
 }
 
 FileWriter::FileWriter(QString str, QObject *parent) :
