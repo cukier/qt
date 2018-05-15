@@ -21,7 +21,7 @@ public:
 
 int main(int argc, char *argv[])
 {
-    CWF::CppWebApplication server(argc, argv, "/home/herik/Sensor/Server/server");
+    CWF::CppWebApplication server(argc, argv, "C:/Users/Mouses/Desktop/server");
     server.addController<SensorController>("/sensor");
     //http://127.0.0.1:8080/sensor
     return server.start();
