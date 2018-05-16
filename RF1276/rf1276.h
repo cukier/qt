@@ -14,6 +14,7 @@ public:
     RF1276(QSerialPort *serialPort, QObject *parent = nullptr);
 
     void searchRadio(QString porta);
+    static QByteArray MakeRadioReadCommand(const int size);
 
 private slots:
     void handleReadyRead();
@@ -91,9 +92,8 @@ private:
                 "\xAF\xAF\x00\x00\xAF\x80\x02\x0C\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x9B\x0D\x0A", 23
                 );
 
-    quint8 crc(const QByteArray& data) const;
-    void MakeRadioRequest(const int commnadYY, QByteArray& data) const;
-    QByteArray MakeRadioReadCommand(const int size) const;
+    static char crc(const QByteArray& data);
+    static void MakeRadioRequest(const int commnadYY, QByteArray& data);
     void MakeRadioReadTransaction();
 };
 

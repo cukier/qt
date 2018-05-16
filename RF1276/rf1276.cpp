@@ -40,7 +40,7 @@ void RF1276::searchRadio(QString porta)
     }
 }
 
-quint8 RF1276::crc(const QByteArray &data) const
+char RF1276::crc(const QByteArray &data)
 {
     quint16 acumulo = 0;
 
@@ -48,13 +48,12 @@ quint8 RF1276::crc(const QByteArray &data) const
         acumulo += i;
     }
 
-    return quint8(acumulo % 256);
+    return char(acumulo % 256);
 }
 
-void RF1276::MakeRadioRequest(const int commnadYY, QByteArray &data) const
+void RF1276::MakeRadioRequest(const int commnadYY, QByteArray &data)
 {
     char m_size = char(data.size());
-    quint8 m_crc = crc(data);
 
     data.push_front(m_size);
     data.push_front(commnadYY);
@@ -64,12 +63,12 @@ void RF1276::MakeRadioRequest(const int commnadYY, QByteArray &data) const
     data.push_front(char(0x00));
     data.push_front(0xAF);
     data.push_front(0xAF);
-    data.push_back(m_crc);
+    data.push_back(crc(data));
     data.push_back(0x0D);
     data.push_back(0x0A);
 }
 
-QByteArray RF1276::MakeRadioReadCommand(const int size) const
+QByteArray RF1276::MakeRadioReadCommand(const int size)
 {
     QByteArray arr(size, 0);
 
