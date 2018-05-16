@@ -1,11 +1,10 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2018-05-15T12:00:22
+# Project created by QtCreator 2018-05-16T08:24:29
 #
 #-------------------------------------------------
 
-QT       += core gui
-QT       += serialport serialbus
+QT       += core gui serialport serialbus
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -26,13 +25,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        rf1276.cpp \
-    settingsdialog.cpp
+        mainwindow.cpp \
+    settings.cpp \
+    rf1276.cpp
 
 HEADERS += \
-        rf1276.h \
-    settingsdialog.h
+        mainwindow.h \
+    settings.h \
+    rf1276.h
 
 FORMS += \
-        rf1276.ui \
-    settingsdialog.ui
+        mainwindow.ui \
+    settings.ui

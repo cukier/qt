@@ -1,37 +1,100 @@
 #ifndef RF1276_H
 #define RF1276_H
 
-#include <QWidget>
-#include <QSerialPort>
+#include <QObject>
 
-class SettingsDialog;
+class QSerialPort;
+class QTimer;
+class Settings;
 
-namespace Ui {
-class RF1276;
-}
-
-class RF1276 : public QWidget
+class RF1276 : public QObject
 {
     Q_OBJECT
-
 public:
-    explicit RF1276(QWidget *parent = 0);
-    ~RF1276();
+    RF1276(QSerialPort *serialPort, QObject *parent = nullptr);
+
+    void searchRadio(QString porta);
 
 private slots:
-    void on_btConfig_clicked();
-    void on_btConectar_clicked();
-    void handleError(QSerialPort::SerialPortError error);
     void handleReadyRead();
-
-    void on_btDesc_clicked();
+    void handleTimeOut();
 
 private:
-    Ui::RF1276 *ui;
-    SettingsDialog *dialog;
-    QSerialPort *m_serialPort;
+    enum Transactions {
+        NoTransaction,
+        ReadTransaction,
+        WriteTransaction,
+        RSSITransaction,
+        Sniffing
+    };
 
-    bool isConnected = false;
+    enum Sizes {
+        DataSize = 12,
+        DataSizeRSSI = 2,
+        CommandSize = 23,
+        CommandSizeRSSI = 13,
+        HeaderSize = 8
+    };
+
+    enum CommandYY {
+        WriteYYCommand = 1,
+        ReadYYCommand,
+        StatndardYYCommand,
+        CentralYYCommand,
+        NodeYYCommand,
+        RSSIYYCommand
+    };
+
+    enum CommandXX {
+        ResponseXXCommand,
+        SendingXXCommand = 0x80
+    };
+
+    enum RfFactor {
+        RF128 = 7,
+        RF256,
+        RF512,
+        RF1024,
+        RF2048,
+        RF4096
+    };
+
+    enum Mode {
+        StandardMode,
+        LowPowerMode,
+        SleepMode
+    };
+
+    enum RfBw {
+        BW62_5K = 6,
+        BW125K,
+        BW250K,
+        BW500K
+    };
+
+    enum RfPower {
+        P4DBM = 1,
+        P7DBM,
+        P10DBM,
+        P13DBM,
+        P14DBM,
+        P17DBM,
+        P20DBm
+    };
+
+    QSerialPort *m_serialPort;
+    QTimer *m_timer;
+    Settings *m_settings;
+
+    int currentTransaction = NoTransaction;
+    const QByteArray discover = QByteArray(
+                "\xAF\xAF\x00\x00\xAF\x80\x02\x0C\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x9B\x0D\x0A"
+                );
+
+    quint8 crc(const QByteArray& data) const;
+    void MakeRadioRequest(const int commnadYY, QByteArray& data) const;
+    QByteArray MakeRadioReadCommand(const int size) const;
+    void MakeRadioReadTransaction();
 };
 
 #endif // RF1276_H

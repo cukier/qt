@@ -1,90 +1,161 @@
 #include "rf1276.h"
-#include "ui_rf1276.h"
 
-#include "settingsdialog.h"
+#include "settings.h"
 
-RF1276::RF1276(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::RF1276),
-    dialog(new SettingsDialog()),
-    m_serialPort(nullptr)
+#include <QSerialPort>
+#include <QDebug>
+#include <QTimer>
+
+RF1276::RF1276(QSerialPort *serialPort, QObject *parent)
+    : QObject(parent),
+      m_serialPort(serialPort),
+      m_timer(new QTimer(this)),
+      m_settings(nullptr)
 {
-    ui->setupUi(this);
-    ui->btDesc->setEnabled(false);
-}
-
-RF1276::~RF1276()
-{
-    delete dialog;
-    delete ui;
-}
-
-void RF1276::on_btConfig_clicked()
-{
-    dialog->show();
-}
-
-void RF1276::on_btConectar_clicked()
-{
-    if (m_serialPort) {
-        delete m_serialPort;
-        m_serialPort = nullptr;
-    }
-
-    m_serialPort = new QSerialPort(this);
-
-    connect(m_serialPort, &QSerialPort::errorOccurred,
-            this, &RF1276::handleError);
-    connect(m_serialPort, &QSerialPort::readyRead,
+    connect(serialPort, &QSerialPort::readyRead,
             this, &RF1276::handleReadyRead);
+    connect(m_timer, &QTimer::timeout,
+            this, &RF1276::handleTimeOut);
+}
 
-    m_serialPort->setPortName(dialog->settings().portName);
-    m_serialPort->setBaudRate(dialog->settings().baud);
-    m_serialPort->setDataBits(QSerialPort::DataBits(dialog->settings().dataBits));
-    m_serialPort->setParity(QSerialPort::Parity(dialog->settings().parity));
-    m_serialPort->setStopBits(QSerialPort::StopBits(dialog->settings().stopBits));
+void RF1276::searchRadio(QString porta)
+{
+    if (!m_serialPort) {
+        m_serialPort = new QSerialPort(this);
+    }
 
-    isConnected = m_serialPort->open(QIODevice::ReadWrite);
+    m_serialPort->close();
+    m_serialPort->setPortName(porta);
+    m_serialPort->setBaudRate(QSerialPort::Baud9600);
+    m_serialPort->setDataBits(QSerialPort::Data8);
+    m_serialPort->setParity(QSerialPort::NoParity);
+    m_serialPort->setStopBits(QSerialPort::OneStop);
 
-    if (isConnected) {
-        ui->label->setText(tr("Conectado %1@%2%3%4%5")
-                           .arg(dialog->settings().portName)
-                           .arg(dialog->settings().baud)
-                           .arg(dialog->settings().dataBits)
-                           .arg(dialog->settings().parity)
-                           .arg(dialog->settings().stopBits));
-        ui->btConectar->setEnabled(false);
-        ui->btDesc->setEnabled(true);
+    if (m_serialPort->open(QIODevice::ReadWrite)) {
+        currentTransaction = Sniffing;
+        m_timer->start(500);
+        m_serialPort->write(discover);
+    } else {
+        qDebug() << "Problemas para abrir a porta";
     }
 }
 
-void RF1276::handleError(QSerialPort::SerialPortError error)
+quint8 RF1276::crc(const QByteArray &data) const
 {
-    if (error != QSerialPort::NoError) {
-        ui->textBrowser->append(QObject::tr("An I/O error occurred while writing"
-                                            " the data to port %1, error: %2")
-                                .arg(m_serialPort->portName())
-                                .arg(m_serialPort->errorString()));
+    quint16 acumulo = 0;
+
+    for(const auto i : data) {
+        acumulo += i;
     }
+
+    return quint8(acumulo % 256);
+}
+
+void RF1276::MakeRadioRequest(const int commnadYY, QByteArray &data) const
+{
+    char m_size = char(data.size());
+    quint8 m_crc = crc(data);
+
+    data.push_front(m_size);
+    data.push_front(commnadYY);
+    data.push_front(SendingXXCommand);
+    data.push_front(0xAF);
+    data.push_front(char(0x00));
+    data.push_front(char(0x00));
+    data.push_front(0xAF);
+    data.push_front(0xAF);
+    data.push_back(m_crc);
+    data.push_back(0x0D);
+    data.push_back(0x0A);
+}
+
+QByteArray RF1276::MakeRadioReadCommand(const int size) const
+{
+    QByteArray arr(size, 0);
+
+    MakeRadioRequest(ReadYYCommand, arr);
+
+    return arr;
+}
+
+void RF1276::MakeRadioReadTransaction()
+{
+    QByteArray request = MakeRadioReadCommand(DataSize);
+
+    currentTransaction = ReadTransaction;
+    m_serialPort->write(request);
 }
 
 void RF1276::handleReadyRead()
 {
-    QByteArray buff = m_serialPort->readAll();
+    QByteArray response = m_serialPort->readAll();
 
-    if (ui->checkBox->isChecked())
-        ui->textBrowser->append(buff.toHex());
-    else
-        ui->textBrowser->append(buff);
+    qDebug() << "RF1276 " << response.size();
+
+    if (currentTransaction == Sniffing) {
+        if (m_timer->isActive())
+            m_timer->stop();
+
+        qDebug() << "Radio encotrado "
+                 << "Porta " << m_serialPort->portName()
+                 << " baud " << m_serialPort->baudRate()
+                 << " data " << m_serialPort->dataBits()
+                 << " parity " << m_serialPort->parity()
+                 << " stop " << m_serialPort->stopBits();
+    }
+
+    for (const auto i : response)
+        qDebug() << QString::number(i, 16) << ' ';
+
+    currentTransaction = NoTransaction;
 }
 
-void RF1276::on_btDesc_clicked()
+void RF1276::handleTimeOut()
 {
-    if (isConnected) {
+    qDebug() << "Timeout";
+
+    if (currentTransaction == Sniffing) {
+        bool repeate = true;
+
+        m_timer->stop();
         m_serialPort->close();
-        isConnected = false;
-        ui->label->setText("Desconectado");
-        ui->btConectar->setEnabled(true);
-        ui->btDesc->setEnabled(false);
+
+        if (m_serialPort->parity() == QSerialPort::NoParity) {
+            m_serialPort->setParity(QSerialPort::EvenParity);
+        } else if (m_serialPort->parity() == QSerialPort::EvenParity) {
+            m_serialPort->setParity(QSerialPort::OddParity);
+        } else {
+            m_serialPort->setParity(QSerialPort::NoParity);
+
+            if (m_serialPort->baudRate() == QSerialPort::Baud1200)
+                m_serialPort->setBaudRate(QSerialPort::Baud2400);
+            else if (m_serialPort->baudRate() == QSerialPort::Baud2400)
+                m_serialPort->setBaudRate(QSerialPort::Baud4800);
+            else if (m_serialPort->baudRate() == QSerialPort::Baud4800)
+                m_serialPort->setBaudRate(QSerialPort::Baud9600);
+            else if (m_serialPort->baudRate() == QSerialPort::Baud9600)
+                m_serialPort->setBaudRate(QSerialPort::Baud19200);
+            else if (m_serialPort->baudRate() == QSerialPort::Baud19200)
+                m_serialPort->setBaudRate(QSerialPort::Baud38400);
+            else if (m_serialPort->baudRate() == QSerialPort::Baud38400)
+                m_serialPort->setBaudRate(QSerialPort::Baud57600);
+            else if (m_serialPort->baudRate() == QSerialPort::Baud57600)
+                m_serialPort->setBaudRate(QSerialPort::Baud115200);
+            else if (m_serialPort->baudRate() == QSerialPort::Baud115200)
+                repeate = false;
+        }
+
+        if (repeate) {
+            if (m_serialPort->open(QIODevice::ReadWrite)){
+                qDebug() << "Testando " << m_serialPort->portName()
+                         << " baud " << m_serialPort->baudRate()
+                         << " data " << m_serialPort->dataBits()
+                         << " parity " << m_serialPort->parity()
+                         << " stop " << m_serialPort->stopBits();
+
+                m_timer->start(500);
+                m_serialPort->write(discover);
+            }
+        }
     }
 }
