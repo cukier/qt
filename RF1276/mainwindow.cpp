@@ -90,6 +90,8 @@ void MainWindow::on_btDesc_clicked()
         ui->btCon->setEnabled(true);
         ui->btDesc->setEnabled(false);
         ui->btSniff->setEnabled(false);
+    } else {
+        emit closePort();
     }
 }
 
@@ -100,12 +102,21 @@ void MainWindow::on_btSettings_clicked()
 
 void MainWindow::on_btSniff_clicked()
 {
-    //    QByteArray m_data = QByteArray("\x0c\x06\x04\x04\x02\x00",6);
+    if (m_radio) {
+        m_radio->disconnect();
+        delete m_radio;
+        m_radio = nullptr;
+    }
 
-    //    QByteArray discover = QByteArray(
-    //                "\xAF\xAF\x00\x00\xAF\x80\x02\x0C\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x9B\x0D\x0A", 23
-    //                );
-    QByteArray discover = RF1276::MakeRadioReadCommand(12);
+    if (m_serialPort) {
+        m_serialPort->close();
+        m_serialPort->disconnect();
+        delete m_serialPort;
+        m_serialPort = nullptr;
+        isConnected = false;
+    }
 
-    m_serialPort->write(discover, discover.size());
+    m_radio = new RF1276(m_settings, this);
+    ui->textBrowser->append("Chamando radio");
+    m_radio->searchRadio();
 }

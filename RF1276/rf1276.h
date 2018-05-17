@@ -11,14 +11,14 @@ class RF1276 : public QObject
 {
     Q_OBJECT
 public:
-    RF1276(QSerialPort *serialPort, QObject *parent = nullptr);
+    RF1276(Settings *settings, QObject *parent = nullptr);
 
-    void searchRadio(QString porta);
-    static QByteArray MakeRadioReadCommand(const int size);
+    void searchRadio();
 
 private slots:
     void handleReadyRead();
     void handleTimeOut();
+    void handleClosePort();
 
 private:
     enum Transactions {
@@ -88,13 +88,12 @@ private:
     Settings *m_settings;
 
     int currentTransaction = NoTransaction;
-    const QByteArray discover = QByteArray(
-                "\xAF\xAF\x00\x00\xAF\x80\x02\x0C\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x9B\x0D\x0A", 23
-                );
+    const int searchTimeOut = 5000;
 
-    static char crc(const QByteArray& data);
-    static void MakeRadioRequest(const int commnadYY, QByteArray& data);
+    char crc(const QByteArray& data);
+    void MakeRadioRequest(const int commnadYY, QByteArray& data);
     void MakeRadioReadTransaction();
+    QByteArray MakeRadioReadCommand(const int size);
 };
 
 #endif // RF1276_H

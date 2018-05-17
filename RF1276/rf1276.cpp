@@ -1,40 +1,42 @@
 #include "rf1276.h"
 
 #include "settings.h"
+#include "mainwindow.h"
 
 #include <QSerialPort>
 #include <QDebug>
 #include <QTimer>
 
-RF1276::RF1276(QSerialPort *serialPort, QObject *parent)
+RF1276::RF1276(Settings *settings, QObject *parent)
     : QObject(parent),
-      m_serialPort(serialPort),
+      m_serialPort(nullptr),
       m_timer(new QTimer(this)),
-      m_settings(nullptr)
+      m_settings(settings)
 {
-    connect(serialPort, &QSerialPort::readyRead,
-            this, &RF1276::handleReadyRead);
-    connect(m_timer, &QTimer::timeout,
-            this, &RF1276::handleTimeOut);
 }
 
-void RF1276::searchRadio(QString porta)
+void RF1276::searchRadio()
 {
     if (!m_serialPort) {
         m_serialPort = new QSerialPort(this);
     }
 
+    connect(m_serialPort, &QSerialPort::readyRead,
+            this, &RF1276::handleReadyRead);
+    connect(m_timer, &QTimer::timeout,
+            this, &RF1276::handleTimeOut);
+
     m_serialPort->close();
-    m_serialPort->setPortName(porta);
-    m_serialPort->setBaudRate(QSerialPort::Baud9600);
+    m_serialPort->setPortName(m_settings->settings().portName);
+    m_serialPort->setBaudRate(QSerialPort::Baud1200);
     m_serialPort->setDataBits(QSerialPort::Data8);
     m_serialPort->setParity(QSerialPort::NoParity);
     m_serialPort->setStopBits(QSerialPort::OneStop);
 
     if (m_serialPort->open(QIODevice::ReadWrite)) {
         currentTransaction = Sniffing;
-        m_timer->start(500);
-        m_serialPort->write(discover);
+        m_timer->start(searchTimeOut);
+        m_serialPort->write(MakeRadioReadCommand(DataSize));
     } else {
         qDebug() << "Problemas para abrir a porta";
     }
@@ -103,8 +105,12 @@ void RF1276::handleReadyRead()
                  << " stop " << m_serialPort->stopBits();
     }
 
+    QString str;
+
     for (const auto i : response)
-        qDebug() << QString::number(i, 16) << ' ';
+        str += tr("0x%1 ").arg(i & 0xFF, 2, 16, QLatin1Char('0'));
+
+    qDebug() << str;
 
     currentTransaction = NoTransaction;
 }
@@ -152,9 +158,19 @@ void RF1276::handleTimeOut()
                          << " parity " << m_serialPort->parity()
                          << " stop " << m_serialPort->stopBits();
 
-                m_timer->start(500);
-                m_serialPort->write(discover);
+                m_timer->start(searchTimeOut);
+                m_serialPort->write(MakeRadioReadCommand(DataSize));
             }
         }
+    }
+}
+
+void RF1276::handleClosePort()
+{
+    if (m_serialPort) {
+        m_serialPort->close();
+        m_serialPort->disconnect();
+        delete m_serialPort;
+        m_serialPort = nullptr;
     }
 }

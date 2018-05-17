@@ -19,6 +19,9 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+signals:
+    void closePort();
+
 private slots:
     void on_btCon_clicked();
     void on_btDesc_clicked();
