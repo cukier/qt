@@ -101,6 +101,23 @@ float RF1276::ByteToFreq(QByteArray freq)
     return aux * 61.035;
 }
 
+RadioDialog::RadioSettings RF1276::getRadio(QByteArray radio)
+{
+    RadioDialog::RadioSettings settings;
+
+    settings.baudRate = radio.at(8);
+    settings.parity = radio.at(9);
+    settings.freq = RF1276::ByteToFreq(radio.mid(10, 3)); //10 11 12
+    settings.rfFactor = radio.at(13);
+    settings.mode = radio.at(14);
+    settings.rfBw = radio.at(15);
+    settings.id = (radio.at(16) << 8 | radio.at(17));
+    settings.NetId = radio.at(18);
+    settings.rfPower = radio.at(19);
+
+    return settings;
+}
+
 void RF1276::MakeRadioReadTransaction()
 {
     QByteArray request = MakeRadioReadCommand(DataSize);
@@ -121,7 +138,7 @@ void RF1276::handleReadyRead()
                 m_timer->stop();
 
             handleClosePort();
-            emit radioEncontrado(response);
+            emit radioEncontrado(getRadio(response));
             return;
         }
     }

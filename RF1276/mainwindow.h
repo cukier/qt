@@ -4,6 +4,8 @@
 #include <QWidget>
 #include <QSerialPort>
 
+#include "radiodialog.h"
+
 class Settings;
 class RF1276;
 class RadioDialog;
@@ -33,7 +35,7 @@ private slots:
     void on_btSniff_clicked();
     void handleError(QSerialPort::SerialPortError error);
     void handleReadyRead();
-    void handleRadioEncontrado(QByteArray radio);
+    void handleRadioEncontrado(RadioDialog::RadioSettings radio);
     void on_btProc_clicked();
 
 private:
@@ -46,7 +48,6 @@ private:
     bool isConnected = false;
 
     void createSerial();
-    void getRadio(QByteArray radio);
 };
 
 #endif // MAINWINDOW_H

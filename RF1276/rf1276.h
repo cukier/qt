@@ -3,6 +3,8 @@
 
 #include <QObject>
 
+#include "radiodialog.h"
+
 class QSerialPort;
 class QTimer;
 class Settings;
@@ -15,11 +17,10 @@ public:
     RF1276(Settings *settings, QObject *parent = nullptr);
 
     void searchRadio();
-    static float ByteToFreq(QByteArray freq);
 
 signals:
     void debugMsg(QString msg);
-    void radioEncontrado(QByteArray radio);
+    void radioEncontrado(RadioDialog::RadioSettings radio);
 
 private slots:
     void handleReadyRead();
@@ -100,6 +101,8 @@ private:
     void MakeRadioRequest(const int commnadYY, QByteArray& data);
     void MakeRadioReadTransaction();
     QByteArray MakeRadioReadCommand(const int size);
+    float ByteToFreq(QByteArray freq);
+    RadioDialog::RadioSettings getRadio(QByteArray radio);
 };
 
 #endif // RF1276_H
