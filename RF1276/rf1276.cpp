@@ -4,8 +4,9 @@
 #include "mainwindow.h"
 
 #include <QSerialPort>
-#include <QDebug>
 #include <QTimer>
+#include <QTextStream>
+#include <QDebug>
 
 RF1276::RF1276(Settings *settings, QObject *parent)
     : QObject(parent),
@@ -33,12 +34,22 @@ void RF1276::searchRadio()
     m_serialPort->setParity(QSerialPort::NoParity);
     m_serialPort->setStopBits(QSerialPort::OneStop);
 
+    QString txt;
+
+    txt = QString("Testando %1@%2 %3%4%5")
+            .arg(m_serialPort->portName())
+            .arg(m_serialPort->baudRate())
+            .arg(m_serialPort->dataBits())
+            .arg(m_serialPort->parity())
+            .arg(m_serialPort->stopBits());
+    emit debugMsg(txt);
+
     if (m_serialPort->open(QIODevice::ReadWrite)) {
         currentTransaction = Sniffing;
         m_timer->start(searchTimeOut);
         m_serialPort->write(MakeRadioReadCommand(DataSize));
     } else {
-        qDebug() << "Problemas para abrir a porta";
+        emit debugMsg("Problemas para abrir a porta");
     }
 }
 
@@ -79,6 +90,17 @@ QByteArray RF1276::MakeRadioReadCommand(const int size)
     return arr;
 }
 
+float RF1276::ByteToFreq(QByteArray freq)
+{
+    quint32 aux = 0;
+
+    if (freq.size() == 3) {
+        aux = freq.at(0) << 16 | freq.at(1) << 8 | freq.at(2);
+    }
+
+    return aux * 61.035;
+}
+
 void RF1276::MakeRadioReadTransaction()
 {
     QByteArray request = MakeRadioReadCommand(DataSize);
@@ -91,18 +113,15 @@ void RF1276::handleReadyRead()
 {
     QByteArray response = m_serialPort->readAll();
 
-    qDebug() << "RF1276 " << response.size();
+    emit debugMsg(QString("RF1276 %1").arg(response.size()));
 
-    if (currentTransaction == Sniffing) {
-        if (m_timer->isActive())
-            m_timer->stop();
+    if (response.size() == 23) {
+        if (currentTransaction == Sniffing) {
+            if (m_timer->isActive())
+                m_timer->stop();
 
-        qDebug() << "Radio encotrado "
-                 << "Porta " << m_serialPort->portName()
-                 << " baud " << m_serialPort->baudRate()
-                 << " data " << m_serialPort->dataBits()
-                 << " parity " << m_serialPort->parity()
-                 << " stop " << m_serialPort->stopBits();
+            emit radioEncontrado(response);
+        }
     }
 
     QString str;
@@ -110,14 +129,14 @@ void RF1276::handleReadyRead()
     for (const auto i : response)
         str += tr("0x%1 ").arg(i & 0xFF, 2, 16, QLatin1Char('0'));
 
-    qDebug() << str;
+    emit debugMsg(str);
 
     currentTransaction = NoTransaction;
 }
 
 void RF1276::handleTimeOut()
 {
-    qDebug() << "Timeout";
+    emit debugMsg("Timeout");
 
     if (currentTransaction == Sniffing) {
         bool repeate = true;
@@ -152,11 +171,15 @@ void RF1276::handleTimeOut()
 
         if (repeate) {
             if (m_serialPort->open(QIODevice::ReadWrite)){
-                qDebug() << "Testando " << m_serialPort->portName()
-                         << " baud " << m_serialPort->baudRate()
-                         << " data " << m_serialPort->dataBits()
-                         << " parity " << m_serialPort->parity()
-                         << " stop " << m_serialPort->stopBits();
+                QString txt;
+
+                txt = QString("Testando %1@%2 %3%4%5")
+                        .arg(m_serialPort->portName())
+                        .arg(m_serialPort->baudRate())
+                        .arg(m_serialPort->dataBits())
+                        .arg(m_serialPort->parity())
+                        .arg(m_serialPort->stopBits());
+                emit debugMsg(txt);
 
                 m_timer->start(searchTimeOut);
                 m_serialPort->write(MakeRadioReadCommand(DataSize));

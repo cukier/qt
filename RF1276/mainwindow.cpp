@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include "radiodialog.h"
 #include "settings.h"
 #include "rf1276.h"
 
@@ -9,17 +10,25 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow),
     m_settings(new Settings()),
     m_serialPort(nullptr),
-    m_radio(nullptr)
+    m_radio(nullptr),
+    m_radioDialog(nullptr)
 {
     ui->setupUi(this);
     ui->btDesc->setEnabled(false);
     ui->btSniff->setEnabled(false);
+    ui->btProc->setEnabled(false);
 }
 
 MainWindow::~MainWindow()
 {
+    delete m_radioDialog;
     delete m_settings;
     delete ui;
+}
+
+void MainWindow::appendText(QString text)
+{
+    ui->textBrowser->append(text);
 }
 
 void MainWindow::on_btCon_clicked()
@@ -37,6 +46,7 @@ void MainWindow::on_btCon_clicked()
         ui->btCon->setEnabled(false);
         ui->btDesc->setEnabled(true);
         ui->btSniff->setEnabled(true);
+        ui->btProc->setEnabled(true);
     }
 }
 
@@ -60,6 +70,42 @@ void MainWindow::handleReadyRead()
         ui->textBrowser->append(buff);
 }
 
+void MainWindow::handleRadioEncontrado(QByteArray radio)
+{
+    if (m_radio) {
+        m_radio->disconnect();
+        delete m_radio;
+        m_radio = nullptr;
+    }
+
+    getRadio(radio);
+
+    if (m_radioDialog->settings().freq != 0) {
+        ui->textBrowser->append(QString("Baudrate %1")
+                                .arg(m_radioDialog->settings().baudRate));
+        ui->textBrowser->append(QString("Parity %1")
+                                .arg( m_radioDialog->settings().parity));
+        ui->textBrowser->append(QString("Frequencie %1")
+                                .arg( m_radioDialog->settings().freq));
+        ui->textBrowser->append(QString("RF Factor %1")
+                                .arg( m_radioDialog->settings().rfFactor));
+        ui->textBrowser->append(QString("Mode %1")
+                                .arg( m_radioDialog->settings().mode));
+        ui->textBrowser->append(QString("RF BW %1")
+                                .arg( m_radioDialog->settings().rfBw));
+        ui->textBrowser->append(QString("ID %1")
+                                .arg( m_radioDialog->settings().id));
+        ui->textBrowser->append(QString("NetID %1")
+                                .arg( m_radioDialog->settings().NetId));
+        ui->textBrowser->append(QString("Power %1")
+                                .arg( m_radioDialog->settings().rfPower));
+    } else {
+        ui->textBrowser->append("Radio nao encontrado");
+    }
+
+    createSerial();
+}
+
 void MainWindow::createSerial()
 {
     if (m_serialPort) {
@@ -81,6 +127,38 @@ void MainWindow::createSerial()
     m_serialPort->setStopBits(QSerialPort::StopBits(m_settings->settings().stop));
 }
 
+float MainWindow::ByteToFreq(QByteArray data)
+{
+    quint32 aux = 0;
+
+    if (data.size() == 3) {
+        aux = data.at(0) << 16 | data.at(1) << 8 | data.at(2);
+    }
+
+    return aux * 61.035;
+}
+
+void MainWindow::getRadio(QByteArray radio)
+{
+    if (!m_radioDialog) {
+        m_radioDialog = new RadioDialog();
+    }
+
+    RadioDialog::RadioSettings settings;
+
+    settings.baudRate = radio.at(8);
+    settings.parity = radio.at(9);
+    settings.freq = ByteToFreq(radio.mid(10, 3)); //10 11 12
+    settings.rfFactor = radio.at(13);
+    settings.mode = radio.at(14);
+    settings.rfBw = radio.at(15);
+    settings.id = (radio.at(16) << 8 | radio.at(17));
+    settings.NetId = radio.at(18);
+    settings.rfPower = radio.at(19);
+
+    m_radioDialog->setSettings(settings);
+}
+
 void MainWindow::on_btDesc_clicked()
 {
     if (isConnected) {
@@ -90,6 +168,7 @@ void MainWindow::on_btDesc_clicked()
         ui->btCon->setEnabled(true);
         ui->btDesc->setEnabled(false);
         ui->btSniff->setEnabled(false);
+        ui->btProc->setEnabled(false);
     } else {
         emit closePort();
     }
@@ -101,6 +180,11 @@ void MainWindow::on_btSettings_clicked()
 }
 
 void MainWindow::on_btSniff_clicked()
+{
+
+}
+
+void MainWindow::on_btProc_clicked()
 {
     if (m_radio) {
         m_radio->disconnect();
@@ -117,6 +201,12 @@ void MainWindow::on_btSniff_clicked()
     }
 
     m_radio = new RF1276(m_settings, this);
+
+    connect(m_radio, &RF1276::debugMsg,
+            this, &MainWindow::appendText);
+    connect(m_radio, &RF1276::radioEncontrado,
+            this, &MainWindow::handleRadioEncontrado);
+
     ui->textBrowser->append("Chamando radio");
     m_radio->searchRadio();
 }

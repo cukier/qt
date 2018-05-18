@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>RadioDialog</class>
+ <widget class="QWidget" name="RadioDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>285</width>
+    <height>142</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Baud Rate:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="QComboBox" name="cbBaud">
+     <item>
+      <property name="text">
+       <string>1200</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>2400</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>4800</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>9600</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>19200</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>38400</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>57600</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="0" column="2">
+    <widget class="QLabel" name="label_4">
+     <property name="text">
+      <string>RF_Factor:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="3">
+    <widget class="QComboBox" name="cbRFactor">
+     <item>
+      <property name="text">
+       <string>128</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>256</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>512</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>1024</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>2048</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>4096</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>Parity:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QComboBox" name="cbParity">
+     <item>
+      <property name="text">
+       <string>No</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Odd</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Even</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="1" column="2">
+    <widget class="QLabel" name="label_5">
+     <property name="text">
+      <string>Mode:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="label_3">
+     <property name="text">
+      <string>Frequencie:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QDoubleSpinBox" name="sbFreq"/>
+   </item>
+   <item row="2" column="2">
+    <widget class="QLabel" name="label_6">
+     <property name="text">
+      <string>RF BW:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QLabel" name="label_7">
+     <property name="text">
+      <string>ID:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QSpinBox" name="sbID"/>
+   </item>
+   <item row="3" column="2">
+    <widget class="QLabel" name="label_8">
+     <property name="text">
+      <string>Net ID:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="3">
+    <widget class="QSpinBox" name="sbNet"/>
+   </item>
+   <item row="4" column="0">
+    <widget class="QLabel" name="label_9">
+     <property name="text">
+      <string>RF Power:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="1">
+    <widget class="QComboBox" name="cbPow">
+     <item>
+      <property name="text">
+       <string>4dBm</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>7dBm</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>10dBm</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>13dBm</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>14dBm</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>17dBm</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>20dBm</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="1" column="3">
+    <widget class="QComboBox" name="cbMode">
+     <item>
+      <property name="text">
+       <string>Standard</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Low Power</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Sleep</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="2" column="3">
+    <widget class="QComboBox" name="cbRfBw">
+     <item>
+      <property name="text">
+       <string>67.5K</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>125K</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>256K</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>512K</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

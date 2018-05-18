@@ -6,14 +6,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>336</width>
-    <height>262</height>
+    <width>274</width>
+    <height>291</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
+   <item row="1" column="2" alignment="Qt::AlignHCenter">
+    <widget class="QPushButton" name="btSettings">
+     <property name="text">
+      <string>&amp;Settings</string>
+     </property>
+    </widget>
+   </item>
    <item row="1" column="0" alignment="Qt::AlignHCenter">
     <widget class="QPushButton" name="btCon">
      <property name="text">
@@ -28,36 +35,36 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="2" alignment="Qt::AlignHCenter">
-    <widget class="QPushButton" name="btSettings">
+   <item row="2" column="0" alignment="Qt::AlignHCenter">
+    <widget class="QPushButton" name="btProc">
      <property name="text">
-      <string>&amp;Settings</string>
+      <string>&amp;Procurar</string>
      </property>
     </widget>
    </item>
-   <item row="1" column="3" alignment="Qt::AlignHCenter">
+   <item row="2" column="1" alignment="Qt::AlignHCenter">
     <widget class="QPushButton" name="btSniff">
      <property name="text">
       <string>S&amp;niffer</string>
      </property>
     </widget>
    </item>
-   <item row="2" column="0" colspan="4">
-    <widget class="QTextBrowser" name="textBrowser"/>
+   <item row="0" column="0" colspan="2">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Desconectado</string>
+     </property>
+    </widget>
    </item>
-   <item row="0" column="3">
+   <item row="0" column="2">
     <widget class="QCheckBox" name="checkBox">
      <property name="text">
       <string>hex</string>
      </property>
     </widget>
    </item>
-   <item row="0" column="0" colspan="3">
-    <widget class="QLabel" name="label">
-     <property name="text">
-      <string>Desconectado</string>
-     </property>
-    </widget>
+   <item row="3" column="0" colspan="3">
+    <widget class="QTextBrowser" name="textBrowser"/>
    </item>
   </layout>
  </widget>

@@ -10,10 +10,15 @@ class Settings;
 class RF1276 : public QObject
 {
     Q_OBJECT
+
 public:
     RF1276(Settings *settings, QObject *parent = nullptr);
 
     void searchRadio();
+
+signals:
+    void debugMsg(QString msg);
+    void radioEncontrado(QByteArray radio);
 
 private slots:
     void handleReadyRead();
@@ -21,36 +26,6 @@ private slots:
     void handleClosePort();
 
 private:
-    enum Transactions {
-        NoTransaction,
-        ReadTransaction,
-        WriteTransaction,
-        RSSITransaction,
-        Sniffing
-    };
-
-    enum Sizes {
-        DataSize = 12,
-        DataSizeRSSI = 2,
-        CommandSize = 23,
-        CommandSizeRSSI = 13,
-        HeaderSize = 8
-    };
-
-    enum CommandYY {
-        WriteYYCommand = 1,
-        ReadYYCommand,
-        StatndardYYCommand,
-        CentralYYCommand,
-        NodeYYCommand,
-        RSSIYYCommand
-    };
-
-    enum CommandXX {
-        ResponseXXCommand,
-        SendingXXCommand = 0x80
-    };
-
     enum RfFactor {
         RF128 = 7,
         RF256,
@@ -83,6 +58,36 @@ private:
         P20DBm
     };
 
+    enum Transactions {
+        NoTransaction,
+        ReadTransaction,
+        WriteTransaction,
+        RSSITransaction,
+        Sniffing
+    };
+
+    enum Sizes {
+        DataSize = 12,
+        DataSizeRSSI = 2,
+        CommandSize = 23,
+        CommandSizeRSSI = 13,
+        HeaderSize = 8
+    };
+
+    enum CommandYY {
+        WriteYYCommand = 1,
+        ReadYYCommand,
+        StatndardYYCommand,
+        CentralYYCommand,
+        NodeYYCommand,
+        RSSIYYCommand
+    };
+
+    enum CommandXX {
+        ResponseXXCommand,
+        SendingXXCommand = 0x80
+    };
+
     QSerialPort *m_serialPort;
     QTimer *m_timer;
     Settings *m_settings;
@@ -94,6 +99,7 @@ private:
     void MakeRadioRequest(const int commnadYY, QByteArray& data);
     void MakeRadioReadTransaction();
     QByteArray MakeRadioReadCommand(const int size);
+    float ByteToFreq(QByteArray freq);
 };
 
 #endif // RF1276_H

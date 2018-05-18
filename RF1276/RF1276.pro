@@ -27,13 +27,16 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     settings.cpp \
-    rf1276.cpp
+    rf1276.cpp \
+    radiodialog.cpp
 
 HEADERS += \
         mainwindow.h \
     settings.h \
-    rf1276.h
+    rf1276.h \
+    radiodialog.h
 
 FORMS += \
         mainwindow.ui \
-    settings.ui
+    settings.ui \
+    radiodialog.ui
