@@ -80,7 +80,7 @@ void MainWindow::handleRadioEncontrado(QByteArray radio)
 
     getRadio(radio);
 
-    if (m_radioDialog->settings().freq != 0) {
+    if (m_radioDialog) {
         ui->textBrowser->append(QString("Baudrate %1")
                                 .arg(m_radioDialog->settings().baudRate));
         ui->textBrowser->append(QString("Parity %1")
@@ -109,6 +109,8 @@ void MainWindow::handleRadioEncontrado(QByteArray radio)
 void MainWindow::createSerial()
 {
     if (m_serialPort) {
+        m_serialPort->close();
+        m_serialPort->disconnect();
         delete m_serialPort;
         m_serialPort = nullptr;
     }
@@ -127,17 +129,6 @@ void MainWindow::createSerial()
     m_serialPort->setStopBits(QSerialPort::StopBits(m_settings->settings().stop));
 }
 
-float MainWindow::ByteToFreq(QByteArray data)
-{
-    quint32 aux = 0;
-
-    if (data.size() == 3) {
-        aux = data.at(0) << 16 | data.at(1) << 8 | data.at(2);
-    }
-
-    return aux * 61.035;
-}
-
 void MainWindow::getRadio(QByteArray radio)
 {
     if (!m_radioDialog) {
@@ -148,7 +139,7 @@ void MainWindow::getRadio(QByteArray radio)
 
     settings.baudRate = radio.at(8);
     settings.parity = radio.at(9);
-    settings.freq = ByteToFreq(radio.mid(10, 3)); //10 11 12
+    settings.freq = RF1276::ByteToFreq(radio.mid(10, 3)); //10 11 12
     settings.rfFactor = radio.at(13);
     settings.mode = radio.at(14);
     settings.rfBw = radio.at(15);

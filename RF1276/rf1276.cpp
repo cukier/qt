@@ -120,7 +120,9 @@ void RF1276::handleReadyRead()
             if (m_timer->isActive())
                 m_timer->stop();
 
+            handleClosePort();
             emit radioEncontrado(response);
+            return;
         }
     }
 

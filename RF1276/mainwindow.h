@@ -46,7 +46,6 @@ private:
     bool isConnected = false;
 
     void createSerial();
-    float ByteToFreq(QByteArray data);
     void getRadio(QByteArray radio);
 };
 

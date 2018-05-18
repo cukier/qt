@@ -15,6 +15,7 @@ public:
     RF1276(Settings *settings, QObject *parent = nullptr);
 
     void searchRadio();
+    static float ByteToFreq(QByteArray freq);
 
 signals:
     void debugMsg(QString msg);
@@ -99,7 +100,6 @@ private:
     void MakeRadioRequest(const int commnadYY, QByteArray& data);
     void MakeRadioReadTransaction();
     QByteArray MakeRadioReadCommand(const int size);
-    float ByteToFreq(QByteArray freq);
 };
 
 #endif // RF1276_H
