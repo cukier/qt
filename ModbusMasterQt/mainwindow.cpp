@@ -357,10 +357,11 @@ QModbusDataUnit MainWindow::readRequest() const
         static_cast<QModbusDataUnit::RegisterType> (ui->writeTable->currentData().toInt());
 
     int startAddress = ui->readAddress->value();
-    Q_ASSERT(startAddress >= 0 && startAddress < 10);
+//    Q_ASSERT(startAddress >= 0 && startAddress < 10);
 
     // do not go beyond 10 entries
-    int numberOfEntries = qMin(ui->readSize->currentText().toInt(), 10 - startAddress);
+//    int numberOfEntries = qMin(ui->readSize->currentText().toInt(), 10 - startAddress);
+    int numberOfEntries = ui->readSize->currentText().toInt();
     return QModbusDataUnit(table, startAddress, numberOfEntries);
 }
 
@@ -370,7 +371,7 @@ QModbusDataUnit MainWindow::writeRequest() const
         static_cast<QModbusDataUnit::RegisterType> (ui->writeTable->currentData().toInt());
 
     int startAddress = ui->writeAddress->value();
-    Q_ASSERT(startAddress >= 0 && startAddress < 10);
+//    Q_ASSERT(startAddress >= 0 && startAddress < 10);
 
     // do not go beyond 10 entries
     int numberOfEntries = qMin(ui->writeSize->currentText().toInt(), 10 - startAddress);
