@@ -3,8 +3,6 @@
 
 #include <QWidget>
 
-#include "rf1276.h"
-
 namespace Ui {
 class RadioDialog;
 }
@@ -30,7 +28,6 @@ public:
     ~RadioDialog();
 
     RadioSettings settings() const;
-
     void setSettings(const RadioSettings &settings);
 
 private:

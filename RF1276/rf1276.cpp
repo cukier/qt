@@ -29,7 +29,8 @@ void RF1276::searchRadio()
 
     m_serialPort->close();
     m_serialPort->setPortName(m_settings->settings().portName);
-    m_serialPort->setBaudRate(QSerialPort::Baud1200);
+    //    m_serialPort->setBaudRate(QSerialPort::Baud1200);
+    m_serialPort->setBaudRate(m_settings->settings().baud);
     m_serialPort->setDataBits(QSerialPort::Data8);
     m_serialPort->setParity(QSerialPort::NoParity);
     m_serialPort->setStopBits(QSerialPort::OneStop);
@@ -95,10 +96,30 @@ float RF1276::ByteToFreq(QByteArray freq)
     quint32 aux = 0;
 
     if (freq.size() == 3) {
-        aux = freq.at(0) << 16 | freq.at(1) << 8 | freq.at(2);
+//        aux = freq.at(0) << 16 | freq.at(1) << 8 | freq.at(2);
+        aux = (freq.at(0) << 16) & 0xFF0000;
+        aux |= (freq.at(1) << 8) & 0xFF00;
+        aux |= freq.at(2) & 0xFF;
     }
 
-    return aux * 61.035;
+    return float(aux) * 61.035;
+}
+
+RadioDialog::RadioSettings RF1276::getRadio(QByteArray radio)
+{
+    RadioDialog::RadioSettings settings;
+
+    settings.baudRate = radio.at(8);
+    settings.parity = radio.at(9);
+    settings.freq = ByteToFreq(radio.mid(10, 3)); //10 11 12
+    settings.rfFactor = radio.at(13);
+    settings.mode = radio.at(14);
+    settings.rfBw = radio.at(15);
+    settings.id = (radio.at(16) << 8 | radio.at(17));
+    settings.NetId = radio.at(18);
+    settings.rfPower = radio.at(19);
+
+    return settings;
 }
 
 void RF1276::MakeRadioReadTransaction()
@@ -167,8 +188,10 @@ void RF1276::handleTimeOut()
                 m_serialPort->setBaudRate(QSerialPort::Baud57600);
             else if (m_serialPort->baudRate() == QSerialPort::Baud57600)
                 m_serialPort->setBaudRate(QSerialPort::Baud115200);
-            else if (m_serialPort->baudRate() == QSerialPort::Baud115200)
+            else if (m_serialPort->baudRate() == QSerialPort::Baud115200) {
                 repeate = false;
+                emit radioEncontrado(QByteArray());
+            }
         }
 
         if (repeate) {

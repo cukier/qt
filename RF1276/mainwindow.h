@@ -46,7 +46,6 @@ private:
     bool isConnected = false;
 
     void createSerial();
-    void getRadio(QByteArray radio);
 };
 
 #endif // MAINWINDOW_H

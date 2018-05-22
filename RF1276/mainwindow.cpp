@@ -34,20 +34,6 @@ void MainWindow::appendText(QString text)
 void MainWindow::on_btCon_clicked()
 {
     createSerial();
-    isConnected = m_serialPort->open(QIODevice::ReadWrite);
-
-    if (isConnected) {
-        ui->label->setText(tr("Conectado %1@%2%3%4%5")
-                           .arg(m_settings->settings().portName)
-                           .arg(m_settings->settings().baud)
-                           .arg(m_settings->settings().data)
-                           .arg(m_settings->settings().parity)
-                           .arg(m_settings->settings().stop));
-        ui->btCon->setEnabled(false);
-        ui->btDesc->setEnabled(true);
-        ui->btSniff->setEnabled(true);
-        ui->btProc->setEnabled(true);
-    }
 }
 
 void MainWindow::handleError(QSerialPort::SerialPortError error)
@@ -78,27 +64,31 @@ void MainWindow::handleRadioEncontrado(QByteArray radio)
         m_radio = nullptr;
     }
 
-    getRadio(radio);
+    if (!m_radioDialog) {
+        m_radioDialog = new RadioDialog();
+    }
+
+    m_radioDialog->setSettings(RF1276::getRadio(radio));
 
     if (m_radioDialog) {
         ui->textBrowser->append(QString("Baudrate %1")
                                 .arg(m_radioDialog->settings().baudRate));
         ui->textBrowser->append(QString("Parity %1")
-                                .arg( m_radioDialog->settings().parity));
+                                .arg(m_radioDialog->settings().parity));
         ui->textBrowser->append(QString("Frequencie %1")
-                                .arg( m_radioDialog->settings().freq));
+                                .arg(m_radioDialog->settings().freq / 10e5));
         ui->textBrowser->append(QString("RF Factor %1")
-                                .arg( m_radioDialog->settings().rfFactor));
+                                .arg(m_radioDialog->settings().rfFactor));
         ui->textBrowser->append(QString("Mode %1")
-                                .arg( m_radioDialog->settings().mode));
+                                .arg(m_radioDialog->settings().mode));
         ui->textBrowser->append(QString("RF BW %1")
-                                .arg( m_radioDialog->settings().rfBw));
+                                .arg(m_radioDialog->settings().rfBw));
         ui->textBrowser->append(QString("ID %1")
-                                .arg( m_radioDialog->settings().id));
+                                .arg(m_radioDialog->settings().id));
         ui->textBrowser->append(QString("NetID %1")
-                                .arg( m_radioDialog->settings().NetId));
+                                .arg(m_radioDialog->settings().NetId));
         ui->textBrowser->append(QString("Power %1")
-                                .arg( m_radioDialog->settings().rfPower));
+                                .arg(m_radioDialog->settings().rfPower));
     } else {
         ui->textBrowser->append("Radio nao encontrado");
     }
@@ -127,32 +117,28 @@ void MainWindow::createSerial()
     m_serialPort->setDataBits(QSerialPort::DataBits(m_settings->settings().data));
     m_serialPort->setParity(QSerialPort::Parity(m_settings->settings().parity));
     m_serialPort->setStopBits(QSerialPort::StopBits(m_settings->settings().stop));
-}
 
-void MainWindow::getRadio(QByteArray radio)
-{
-    if (!m_radioDialog) {
-        m_radioDialog = new RadioDialog();
+    isConnected = m_serialPort->open(QIODevice::ReadWrite);
+
+    if (isConnected) {
+        ui->label->setText(tr("Conectado %1@%2%3%4%5")
+                           .arg(m_settings->settings().portName)
+                           .arg(m_settings->settings().baud)
+                           .arg(m_settings->settings().data)
+                           .arg(m_settings->settings().parity)
+                           .arg(m_settings->settings().stop));
+        ui->btCon->setEnabled(false);
+        ui->btDesc->setEnabled(true);
+        ui->btSniff->setEnabled(true);
+        ui->btProc->setEnabled(true);
+        ui->btSettings->setEnabled(false);
     }
-
-    RadioDialog::RadioSettings settings;
-
-    settings.baudRate = radio.at(8);
-    settings.parity = radio.at(9);
-    settings.freq = RF1276::ByteToFreq(radio.mid(10, 3)); //10 11 12
-    settings.rfFactor = radio.at(13);
-    settings.mode = radio.at(14);
-    settings.rfBw = radio.at(15);
-    settings.id = (radio.at(16) << 8 | radio.at(17));
-    settings.NetId = radio.at(18);
-    settings.rfPower = radio.at(19);
-
-    m_radioDialog->setSettings(settings);
 }
 
 void MainWindow::on_btDesc_clicked()
 {
     if (isConnected) {
+        m_serialPort->disconnect();
         m_serialPort->close();
         isConnected = false;
         ui->label->setText("Desconectado");
@@ -160,6 +146,7 @@ void MainWindow::on_btDesc_clicked()
         ui->btDesc->setEnabled(false);
         ui->btSniff->setEnabled(false);
         ui->btProc->setEnabled(false);
+        ui->btSettings->setEnabled(true);
     } else {
         emit closePort();
     }
