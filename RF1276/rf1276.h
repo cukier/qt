@@ -103,6 +103,9 @@ private:
     void MakeRadioReadTransaction();
     QByteArray MakeRadioReadCommand(const int size);
     static float ByteToFreq(QByteArray freq);
+    quint8 touchar(int in, int index) const;
+    QByteArray freqtouchar(float freq) const;
+    QByteArray MaeRadioWriteCommand(const RadioDialog::RadioSettings data) const;
 };
 
 #endif // RF1276_H

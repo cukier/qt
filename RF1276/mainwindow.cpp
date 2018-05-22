@@ -64,31 +64,37 @@ void MainWindow::handleRadioEncontrado(QByteArray radio)
         m_radio = nullptr;
     }
 
-    if (!m_radioDialog) {
-        m_radioDialog = new RadioDialog();
-    }
+    if (radio.size() == 23) {
+        ui->btSniff->setVisible(true);
 
-    m_radioDialog->setSettings(RF1276::getRadio(radio));
+        if (!m_radioDialog) {
+            m_radioDialog = new RadioDialog();
+        }
 
-    if (m_radioDialog) {
-        ui->textBrowser->append(QString("Baudrate %1")
-                                .arg(m_radioDialog->settings().baudRate));
-        ui->textBrowser->append(QString("Parity %1")
-                                .arg(m_radioDialog->settings().parity));
-        ui->textBrowser->append(QString("Frequencie %1")
-                                .arg(m_radioDialog->settings().freq / 10e5));
-        ui->textBrowser->append(QString("RF Factor %1")
-                                .arg(m_radioDialog->settings().rfFactor));
-        ui->textBrowser->append(QString("Mode %1")
-                                .arg(m_radioDialog->settings().mode));
-        ui->textBrowser->append(QString("RF BW %1")
-                                .arg(m_radioDialog->settings().rfBw));
-        ui->textBrowser->append(QString("ID %1")
-                                .arg(m_radioDialog->settings().id));
-        ui->textBrowser->append(QString("NetID %1")
-                                .arg(m_radioDialog->settings().NetId));
-        ui->textBrowser->append(QString("Power %1")
-                                .arg(m_radioDialog->settings().rfPower));
+        m_radioDialog->setSettings(RF1276::getRadio(radio));
+
+        if (m_radioDialog) {
+            ui->textBrowser->append(QString("Baudrate %1")
+                                    .arg(m_radioDialog->settings().baudRate));
+            ui->textBrowser->append(QString("Parity %1")
+                                    .arg(m_radioDialog->settings().parity));
+            ui->textBrowser->append(QString("Frequencie %1 MHz")
+                                    .arg(m_radioDialog->settings().freq / 10e5));
+            ui->textBrowser->append(QString("RF Factor %1")
+                                    .arg(m_radioDialog->settings().rfFactor));
+            ui->textBrowser->append(QString("Mode %1")
+                                    .arg(m_radioDialog->settings().mode));
+            ui->textBrowser->append(QString("RF BW %1")
+                                    .arg(m_radioDialog->settings().rfBw));
+            ui->textBrowser->append(QString("ID %1")
+                                    .arg(m_radioDialog->settings().id));
+            ui->textBrowser->append(QString("NetID %1")
+                                    .arg(m_radioDialog->settings().NetId));
+            ui->textBrowser->append(QString("Power %1")
+                                    .arg(m_radioDialog->settings().rfPower));
+        } else {
+            ui->textBrowser->append("Radio nao encontrado");
+        }
     } else {
         ui->textBrowser->append("Radio nao encontrado");
     }
@@ -129,7 +135,6 @@ void MainWindow::createSerial()
                            .arg(m_settings->settings().stop));
         ui->btCon->setEnabled(false);
         ui->btDesc->setEnabled(true);
-        ui->btSniff->setEnabled(true);
         ui->btProc->setEnabled(true);
         ui->btSettings->setEnabled(false);
     }
