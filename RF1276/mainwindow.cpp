@@ -5,6 +5,8 @@
 #include "settings.h"
 #include "rf1276.h"
 
+#include <QTimer>
+
 MainWindow::MainWindow(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MainWindow),
@@ -71,6 +73,8 @@ void MainWindow::handleRadioEncontrado(QByteArray radio)
             m_radioDialog = new RadioDialog();
         }
 
+        connect(m_radioDialog, &RadioDialog::apply,
+                this, &MainWindow::handleApply);
         m_radioDialog->setSettings(RF1276::getRadio(radio));
 
         if (m_radioDialog) {
@@ -101,6 +105,28 @@ void MainWindow::handleRadioEncontrado(QByteArray radio)
     }
 
     createSerial();
+}
+
+void MainWindow::handleApply()
+{
+    ui->textBrowser->append(QString("Baudrate %1")
+                            .arg(m_radioDialog->settings().baudRate));
+    ui->textBrowser->append(QString("Parity %1")
+                            .arg(m_radioDialog->settings().parity));
+    ui->textBrowser->append(QString("Frequencie %1 MHz")
+                            .arg(m_radioDialog->settings().freq / 10e5));
+    ui->textBrowser->append(QString("RF Factor %1")
+                            .arg(m_radioDialog->settings().rfFactor));
+    ui->textBrowser->append(QString("Mode %1")
+                            .arg(m_radioDialog->settings().mode));
+    ui->textBrowser->append(QString("RF BW %1")
+                            .arg(m_radioDialog->settings().rfBw));
+    ui->textBrowser->append(QString("ID %1")
+                            .arg(m_radioDialog->settings().id));
+    ui->textBrowser->append(QString("NetID %1")
+                            .arg(m_radioDialog->settings().NetId));
+    ui->textBrowser->append(QString("Power %1")
+                            .arg(m_radioDialog->settings().rfPower));
 }
 
 void MainWindow::createSerial()
@@ -165,15 +191,7 @@ void MainWindow::on_btSettings_clicked()
 
 void MainWindow::on_btSniff_clicked()
 {
-    ui->textBrowser->append(QString::number(m_radioDialog->settings().freq));
-
-    RadioDialog::RadioSettings settings = m_radioDialog->settings();
-
-    settings.freq = 9.16e+8;
-
-    QByteArray req = RF1276::MaeRadioWriteCommand(settings);
-
-    m_serialPort->write(req);
+    m_radioDialog->show();
 }
 
 void MainWindow::on_btProc_clicked()

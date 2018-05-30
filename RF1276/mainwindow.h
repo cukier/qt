@@ -31,10 +31,11 @@ private slots:
     void on_btDesc_clicked();
     void on_btSettings_clicked();
     void on_btSniff_clicked();
+    void on_btProc_clicked();
     void handleError(QSerialPort::SerialPortError error);
     void handleReadyRead();
     void handleRadioEncontrado(QByteArray radio);
-    void on_btProc_clicked();
+    void handleApply();
 
 private:
     Ui::MainWindow *ui;
