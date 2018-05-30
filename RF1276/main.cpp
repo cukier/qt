@@ -1,12 +1,10 @@
-//#include "mainwindow.h"
-#include "radio.h"
+#include "mainwindow.h"
 #include <QApplication>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-//    MainWindow w;
-    Radio w;
+    MainWindow w;
 
     w.show();
 

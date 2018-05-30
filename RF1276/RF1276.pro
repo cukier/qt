@@ -39,5 +39,4 @@ HEADERS += \
 FORMS += \
         mainwindow.ui \
     settings.ui \
-    radiodialog.ui \
-    radio.ui
+    radiodialog.ui
