@@ -113,6 +113,8 @@ quint8 RF1276::touchar(int in, int index) const
     aux = in & mask;
     aux >>= index * 8;
     aux &= 0xFF;
+
+    return aux;
 }
 
 QByteArray RF1276::freqtouchar(float freq) const
@@ -123,7 +125,7 @@ QByteArray RF1276::freqtouchar(float freq) const
     aux = quint32(freq / 61.035);
 
     for (int i = 0; i < ret.size(); ++i) {
-        ret.at(i) = touchar(aux, cont);
+        ret[i] = touchar(aux, i);
     }
 
     return ret;
@@ -131,12 +133,12 @@ QByteArray RF1276::freqtouchar(float freq) const
 
 QByteArray RF1276::MaeRadioWriteCommand(const RadioDialog::RadioSettings data) const
 {
-    QByteArray ret(0, DataSize);
+    QByteArray ret;
     QByteArray aux = freqtouchar(data.freq);
 
     ret.append(data.baudRate);
     ret.append(data.parity);
-    ret.insert(ret.end(), aux);
+    ret.insert(ret.size(), aux);
     ret.append(data.rfFactor);
     ret.append(data.mode);
     ret.append(data.rfBw);

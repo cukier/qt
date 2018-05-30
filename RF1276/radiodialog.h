@@ -30,6 +30,12 @@ public:
     RadioSettings settings() const;
     void setSettings(const RadioSettings &settings);
 
+signals:
+    void apply();
+
+private slots:
+    void on_btApply_clicked();
+
 private:
     Ui::RadioDialog *ui;
     RadioSettings m_settings;

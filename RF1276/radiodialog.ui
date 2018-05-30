@@ -6,14 +6,33 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>285</width>
-    <height>142</height>
+    <width>300</width>
+    <height>171</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
+   <item row="1" column="3">
+    <widget class="QComboBox" name="cbMode">
+     <item>
+      <property name="text">
+       <string>Standard</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Low Power</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Sleep</string>
+      </property>
+     </item>
+    </widget>
+   </item>
    <item row="0" column="0">
     <widget class="QLabel" name="label">
      <property name="text">
@@ -67,6 +86,32 @@
      </property>
     </widget>
    </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>Parity:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QComboBox" name="cbParity">
+     <item>
+      <property name="text">
+       <string>No</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Odd</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Even</string>
+      </property>
+     </item>
+    </widget>
+   </item>
    <item row="0" column="3">
     <widget class="QComboBox" name="cbRFactor">
      <item>
@@ -101,53 +146,10 @@
      </item>
     </widget>
    </item>
-   <item row="1" column="0">
-    <widget class="QLabel" name="label_2">
-     <property name="text">
-      <string>Parity:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="1">
-    <widget class="QComboBox" name="cbParity">
-     <item>
-      <property name="text">
-       <string>No</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Odd</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Even</string>
-      </property>
-     </item>
-    </widget>
-   </item>
    <item row="1" column="2">
     <widget class="QLabel" name="label_5">
      <property name="text">
       <string>Mode:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="0">
-    <widget class="QLabel" name="label_3">
-     <property name="text">
-      <string>Frequencie:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="1">
-    <widget class="QDoubleSpinBox" name="sbFreq"/>
-   </item>
-   <item row="2" column="2">
-    <widget class="QLabel" name="label_6">
-     <property name="text">
-      <string>RF BW:</string>
      </property>
     </widget>
    </item>
@@ -158,18 +160,22 @@
      </property>
     </widget>
    </item>
-   <item row="3" column="1">
-    <widget class="QSpinBox" name="sbID"/>
+   <item row="2" column="1">
+    <widget class="QDoubleSpinBox" name="sbFreq"/>
    </item>
-   <item row="3" column="2">
-    <widget class="QLabel" name="label_8">
+   <item row="2" column="0">
+    <widget class="QLabel" name="label_3">
      <property name="text">
-      <string>Net ID:</string>
+      <string>Frequencie:</string>
      </property>
     </widget>
    </item>
-   <item row="3" column="3">
-    <widget class="QSpinBox" name="sbNet"/>
+   <item row="2" column="2">
+    <widget class="QLabel" name="label_6">
+     <property name="text">
+      <string>RF BW:</string>
+     </property>
+    </widget>
    </item>
    <item row="4" column="0">
     <widget class="QLabel" name="label_9">
@@ -217,24 +223,18 @@
      </item>
     </widget>
    </item>
-   <item row="1" column="3">
-    <widget class="QComboBox" name="cbMode">
-     <item>
-      <property name="text">
-       <string>Standard</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Low Power</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Sleep</string>
-      </property>
-     </item>
+   <item row="3" column="2">
+    <widget class="QLabel" name="label_8">
+     <property name="text">
+      <string>Net ID:</string>
+     </property>
     </widget>
+   </item>
+   <item row="3" column="3">
+    <widget class="QSpinBox" name="sbNet"/>
+   </item>
+   <item row="3" column="1">
+    <widget class="QSpinBox" name="sbID"/>
    </item>
    <item row="2" column="3">
     <widget class="QComboBox" name="cbRfBw">
@@ -258,6 +258,13 @@
        <string>512K</string>
       </property>
      </item>
+    </widget>
+   </item>
+   <item row="5" column="3">
+    <widget class="QPushButton" name="btApply">
+     <property name="text">
+      <string>&amp;Apply</string>
+     </property>
     </widget>
    </item>
   </layout>
