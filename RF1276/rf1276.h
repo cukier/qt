@@ -18,6 +18,7 @@ public:
 
     void searchRadio();
     static RadioDialog::RadioSettings getRadio(QByteArray radio);
+    static QByteArray MaeRadioWriteCommand(const RadioDialog::RadioSettings data);
 
 signals:
     void debugMsg(QString msg);
@@ -98,14 +99,13 @@ private:
     int currentTransaction = NoTransaction;
     const int searchTimeOut = 5000;
 
-    char crc(const QByteArray& data);
-    void MakeRadioRequest(const int commnadYY, QByteArray& data);
+    static char crc(const QByteArray& data);
+    static void MakeRadioRequest(const int commnadYY, QByteArray& data);
     void MakeRadioReadTransaction();
     QByteArray MakeRadioReadCommand(const int size);
     static float ByteToFreq(QByteArray freq);
-    quint8 touchar(int in, int index) const;
-    QByteArray freqtouchar(float freq) const;
-    QByteArray MaeRadioWriteCommand(const RadioDialog::RadioSettings data) const;
+    static quint8 touchar(int in, int index);
+    static QByteArray freqtouchar(float freq);
 };
 
 #endif // RF1276_H

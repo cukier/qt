@@ -105,7 +105,7 @@ float RF1276::ByteToFreq(QByteArray freq)
     return float(aux) * 61.035;
 }
 
-quint8 RF1276::touchar(int in, int index) const
+quint8 RF1276::touchar(int in, int index)
 {
     int mask, aux;
 
@@ -117,7 +117,7 @@ quint8 RF1276::touchar(int in, int index) const
     return aux;
 }
 
-QByteArray RF1276::freqtouchar(float freq) const
+QByteArray RF1276::freqtouchar(float freq)
 {
     quint32 aux = 0;
     QByteArray ret(3, 0);
@@ -125,13 +125,13 @@ QByteArray RF1276::freqtouchar(float freq) const
     aux = quint32(freq / 61.035);
 
     for (int i = 0; i < ret.size(); ++i) {
-        ret[i] = touchar(aux, i);
+        ret[i] = touchar(aux, 2 - i);
     }
 
     return ret;
 }
 
-QByteArray RF1276::MaeRadioWriteCommand(const RadioDialog::RadioSettings data) const
+QByteArray RF1276::MaeRadioWriteCommand(const RadioDialog::RadioSettings data)
 {
     QByteArray ret;
     QByteArray aux = freqtouchar(data.freq);
@@ -146,6 +146,8 @@ QByteArray RF1276::MaeRadioWriteCommand(const RadioDialog::RadioSettings data) c
     ret.append(touchar(data.id, 0));
     ret.append(data.NetId);
     ret.append(data.rfPower);
+
+    MakeRadioRequest(WriteYYCommand, ret);
 
     return ret;
 }

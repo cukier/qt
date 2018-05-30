@@ -92,6 +92,7 @@ void MainWindow::handleRadioEncontrado(QByteArray radio)
                                     .arg(m_radioDialog->settings().NetId));
             ui->textBrowser->append(QString("Power %1")
                                     .arg(m_radioDialog->settings().rfPower));
+            ui->btSniff->setEnabled(true);
         } else {
             ui->textBrowser->append("Radio nao encontrado");
         }
@@ -164,7 +165,15 @@ void MainWindow::on_btSettings_clicked()
 
 void MainWindow::on_btSniff_clicked()
 {
+    ui->textBrowser->append(QString::number(m_radioDialog->settings().freq));
 
+    RadioDialog::RadioSettings settings = m_radioDialog->settings();
+
+    settings.freq = 9.16e+8;
+
+    QByteArray req = RF1276::MaeRadioWriteCommand(settings);
+
+    m_serialPort->write(req);
 }
 
 void MainWindow::on_btProc_clicked()
